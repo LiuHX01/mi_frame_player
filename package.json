@@ -1,0 +1,23 @@
+{
+  "name": "mi_frame_player",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.2.25"
+  },
+  "devDependencies": {
+    "@element-plus/icons-vue": "^2.0.5",
+    "@vitejs/plugin-vue": "^2.3.3",
+    "axios": "^0.27.2",
+    "element-plus": "^2.2.5",
+    "normalize.css": "^8.0.1",
+    "three": "^0.141.0",
+    "vite": "^2.9.9",
+    "vite-plugin-glsl": "^0.1.2"
+  }
+}
