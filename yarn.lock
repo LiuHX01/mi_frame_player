@@ -188,6 +188,11 @@
     "follow-redirects" "^1.14.9"
     "form-data" "^4.0.0"
 
+"batch-processor@1.0.0":
+  "integrity" "sha512-xoLQD8gmmR32MeuBHgH0Tzd5PuSZx71ZsbhVxOCRbgktZEPe4SQy7s9Z50uPp0F/f7iw2XmkHN2xkgbMfckMDA=="
+  "resolved" "https://registry.npmjs.org/batch-processor/-/batch-processor-1.0.0.tgz"
+  "version" "1.0.0"
+
 "combined-stream@^1.0.8":
   "integrity" "sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg=="
   "resolved" "https://registry.npmjs.org/combined-stream/-/combined-stream-1.0.8.tgz"
@@ -230,6 +235,13 @@
     "lodash-unified" "^1.0.2"
     "memoize-one" "^6.0.0"
     "normalize-wheel-es" "^1.1.2"
+
+"element-resize-detector@^1.2.4":
+  "integrity" "sha512-Fl5Ftk6WwXE0wqCgNoseKWndjzZlDCwuPTcoVZfCP9R3EHQF8qUtr3YUPNETegRBOKqQKPW3n4kiIWngGi8tKg=="
+  "resolved" "https://registry.npmjs.org/element-resize-detector/-/element-resize-detector-1.2.4.tgz"
+  "version" "1.2.4"
+  dependencies:
+    "batch-processor" "1.0.0"
 
 "esbuild-windows-64@0.14.43":
   "integrity" "sha512-8NsuNfI8xwFuJbrCuI+aBqNTYkrWErejFO5aYM+yHqyHuL8mmepLS9EPzAzk8rvfaJrhN0+RvKWAcymViHOKEw=="

@@ -21,7 +21,6 @@ export default defineComponent({
             timer: null,
             frame: 0,
             speed: 1,
-            speedText: '1x',
             isPlaying: false,
             percent: 0.0,
         })
@@ -85,7 +84,6 @@ export default defineComponent({
 
         const speedChange = (speed) => {
             state.speed = speed
-            state.speedText = `${speed}x`
         }
 
 
@@ -149,8 +147,8 @@ export default defineComponent({
                     </div>
 
                     <div class="speed-control">
-                        <el-dropdown trigger="click">
-                            <el-button type="primary">{{ state.speedText }}</el-button>
+                        <el-dropdown trigger="hover">
+                            <el-button type="primary">{{ state.speed }} x</el-button>
                             <template #dropdown>
                                 <el-dropdown-menu slot="dropdown">
                                     <el-dropdown-item @click="speedChange(1)">1x</el-dropdown-item>

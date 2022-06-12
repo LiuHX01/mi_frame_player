@@ -1,11 +1,12 @@
 <script>
-import { defineComponent, ref, reactive, toRefs, onMounted } from "vue";
+import { defineComponent, ref, reactive, toRefs, onMounted, onUnmounted, watch, onBeforeMount } from "vue";
 import framePlayerControl from './components/index.vue';
 import Axios from 'axios';
 import * as THREE from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min'
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js'
+import elementResizeDetectorMaker from 'element-resize-detector';
 
 
 
@@ -60,7 +61,6 @@ export default defineComponent({
       }
 
       const { position } = await parsePointCloud(lidarResponse.data)
-      // console.log('position', position)
       pointCloud.geometry.setAttribute(
         'position',
         new THREE.Float32BufferAttribute(position, 3)
@@ -108,6 +108,9 @@ export default defineComponent({
     }
 
 
+
+
+
     // 挂载时，初始化数据
     onMounted(() => {
       console.log('onMounted');
@@ -115,10 +118,19 @@ export default defineComponent({
       canvasObj.canvas = document.getElementById('canvas');
       canvasObj.ctx = canvas.getContext('2d');
 
-      canvasObj.canvas.width = containerImage.value.clientWidth;
-      canvasObj.canvas.height = containerImage.value.clientHeight;
-      // console.log(containerImage.value)
 
+      const erd = elementResizeDetectorMaker()
+      erd.listenTo(containerImage.value, () => {
+        console.log('resize', containerImage.value.clientWidth, containerImage.value.clientHeight)
+        canvasObj.canvas.width = containerImage.value.clientWidth
+        canvasObj.canvas.height = containerImage.value.clientHeight
+        canvasObj.ctx.drawImage(state.image, 0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
+      })
+
+
+      const stats = new Stats();
+      stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+      document.body.appendChild(stats.dom);
 
 
 
@@ -139,12 +151,16 @@ export default defineComponent({
       function animate() {
         requestAnimationFrame(animate);
         controls.update();
+
+        stats.update();
+
         renderer.render(scene, camera);
       }
       animate();
 
 
       fetchSingleData(timeRange[0])
+
     });
 
     return {
@@ -178,7 +194,7 @@ export default defineComponent({
 
 <style>
 .main-page {
-  display: flex;
+  /* display: flex; */
   flex-direction: column;
   align-items: center;
   justify-content: center;
