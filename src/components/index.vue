@@ -48,13 +48,15 @@ export default defineComponent({
             console.log('start')
 
             const run = () => {
-                let playPerFrame = 100
+                let playPerFrame = 1000
                 if (state.speed === 1) {
-                    playPerFrame = 100
+                    playPerFrame = 1000 / 10
                 } else if (state.speed === 2) {
-                    playPerFrame = 50
+                    playPerFrame = 1000 / 20
                 } else if (state.speed === 4) {
-                    playPerFrame = 10
+                    playPerFrame = 1000 / 40
+                } else if (state.speed === 6) {
+                    playPerFrame = 1000 / 60
                 }
 
                 if (state.timer) {
@@ -135,14 +137,14 @@ export default defineComponent({
 
         const upSpeed = () => {
             if (state.speed < 4) {
-                state.speed *= 2
+                state.speed += 2
             }
         }
 
 
         const downSpeed = () => {
             if (state.speed > 1) {
-                state.speed /= 2
+                state.speed -= 2
             }
         }
 
@@ -196,7 +198,7 @@ export default defineComponent({
 
         const calcNowFrame = computed(() => {
             const r = Number(((state.frame * 100) / (props.timeRange.length - 1)).toFixed(2))
-            console.log('calcNowFrame', r)
+            // console.log('calcNowFrame', r)
             return r
         })
 
@@ -243,6 +245,7 @@ export default defineComponent({
                                         <el-dropdown-item @click="speedChange(1)">1x</el-dropdown-item>
                                         <el-dropdown-item @click="speedChange(2)">2x</el-dropdown-item>
                                         <el-dropdown-item @click="speedChange(4)">4x</el-dropdown-item>
+                                        <el-dropdown-item @click="speedChange(6)">6x</el-dropdown-item>
                                     </el-dropdown-menu>
                                 </template>
                             </el-dropdown>

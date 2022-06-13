@@ -1,12 +1,13 @@
 <script>
-import { defineComponent, ref, reactive, toRefs, onMounted, onUnmounted, watch, onBeforeMount } from "vue";
+import { defineComponent, ref, reactive, toRefs, onMounted } from "vue";
 import framePlayerControl from './components/index.vue';
 import Axios from 'axios';
 import * as THREE from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module';
-import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min'
-import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js'
-import elementResizeDetectorMaker from 'element-resize-detector';
+import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
+import gsap from 'gsap';
+// import elementResizeDetectorMaker from 'element-resize-detector';
 
 
 
@@ -185,8 +186,7 @@ export default defineComponent({
 
 
 
-      // GUI
-      const gui = new GUI();
+      
 
 
 
@@ -202,7 +202,7 @@ export default defineComponent({
       scene.add(axesHelper);
       scene.add(pointCloud);
 
-      camera.position.z = 5;
+      camera.position.z = 60;
 
       function animate() {
         requestAnimationFrame(animate);
@@ -211,6 +211,35 @@ export default defineComponent({
         renderer.render(scene, camera);
       }
       animate();
+
+
+
+      // GUI
+      const EView = {
+        viewA: 'viewA',
+        viewB: 'viewB',
+      }
+      const gui = new GUI();
+      const settings = {
+        visual: EView.viewA,
+      }
+      gui.add(settings, 'visual', [EView.viewA, EView.viewB]).listen().onChange((view) => {
+        if (view === EView.viewA) {
+          // camera.position.set(0, 0, 60);
+          // controls.target.set(0, 0, 0);
+          // camera.up.set(0, 1, 0);
+          gsap.to(camera.position, {x: 0, y: 0, z: 60, duration: 1})
+          gsap.to(controls.target, {x: 0, y: 0, z: 0, duration: 1})
+          gsap.to(camera.up, {x: 0, y: 1, z: 0, duration: 1})
+        } else {
+          // camera.position.set(-5, 0, 5);
+          // controls.target.set(20, 0, 0);
+          // camera.up.set(0, 0, 1);
+          gsap.to(camera.position, {x: -5, y: 0, z: 5, duration: 1})
+          gsap.to(controls.target, {x: 5, y: 0, z: 0, duration: 1})
+          gsap.to(camera.up, {x: 0, y: 0, z: 1, duration: 1})
+        }
+      })
 
 
 
