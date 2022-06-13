@@ -5,7 +5,7 @@ import 'element-plus/dist/index.css'
 
 /**
  * TODO:
- * 1. Canvas 大小自适应
+ * 1. Canvas 适应窗口大小只能放大，不能缩小
  * 2. Canvas 图片性能？
  */
 

@@ -53,12 +53,14 @@ export default defineComponent({
         responseType: 'arraybuffer'
       })
 
-      state.image.src = blobToCanvasImg(imageResponse.data)
-      state.image.onload = function () {
+      state.image.src = URL.createObjectURL(imageResponse.data)
+      state.image.onload = (async () => {
         canvasObj.ctx.clearRect(0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
         console.log(canvasObj.canvas.width, canvasObj.canvas.height)
-        canvasObj.ctx.drawImage(state.image, 0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
-      }
+        // canvasObj.ctx.drawImage(state.image, 0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
+        const imageBitmap = await createImageBitmap(state.image)
+        canvasObj.ctx.drawImage(imageBitmap, 0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
+      })
 
       const { position } = await parsePointCloud(lidarResponse.data)
       pointCloud.geometry.setAttribute(
@@ -67,11 +69,6 @@ export default defineComponent({
       )
     }
 
-    // 得到的数据转换为canvas图
-    const blobToCanvasImg = (blob) => {
-      const url = URL.createObjectURL(blob)
-      return url
-    }
 
 
     const pointCloudGeometry = new THREE.BufferGeometry()
@@ -119,13 +116,22 @@ export default defineComponent({
       canvasObj.ctx = canvas.getContext('2d');
 
 
-      const erd = elementResizeDetectorMaker()
-      erd.listenTo(containerImage.value, () => {
-        console.log('resize', containerImage.value.clientWidth, containerImage.value.clientHeight)
+      // const erd = elementResizeDetectorMaker()
+      // erd.listenTo(containerImage.value, () => {
+      //   console.log('resize', containerImage.value.clientWidth, containerImage.value.clientHeight)
+      //   canvasObj.canvas.width = containerImage.value.clientWidth
+      //   canvasObj.canvas.height = containerImage.value.clientHeight
+      //   canvasObj.ctx.drawImage(state.image, 0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
+      // })
+
+
+      window.onresize = () => {
+        console.log('resize', window.innerWidth, window.innerHeight)
         canvasObj.canvas.width = containerImage.value.clientWidth
         canvasObj.canvas.height = containerImage.value.clientHeight
         canvasObj.ctx.drawImage(state.image, 0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
-      })
+      }
+
 
 
       const stats = new Stats();
@@ -194,10 +200,8 @@ export default defineComponent({
 
 <style>
 .main-page {
-  /* display: flex; */
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  height: auto;
 }
 
 .container {
