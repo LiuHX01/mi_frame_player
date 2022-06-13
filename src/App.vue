@@ -25,11 +25,11 @@ export default defineComponent({
       lidar: [],
       image: new Image,
     })
-
     const canvasObj = reactive({
       canvas: null,
       ctx: null,
     })
+
 
 
     // 获得图片名集合
@@ -41,6 +41,7 @@ export default defineComponent({
       return timeRange
     }
     const timeRange = getAllImageName()
+
 
 
     // 获得一帧数据
@@ -56,17 +57,20 @@ export default defineComponent({
       state.image.src = URL.createObjectURL(imageResponse.data)
       state.image.onload = (async () => {
         canvasObj.ctx.clearRect(0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
-        console.log(canvasObj.canvas.width, canvasObj.canvas.height)
         // canvasObj.ctx.drawImage(state.image, 0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
         const imageBitmap = await createImageBitmap(state.image)
         canvasObj.ctx.drawImage(imageBitmap, 0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
       })
 
-      const { position } = await parsePointCloud(lidarResponse.data)
+      const { position, color } = await parsePointCloud(lidarResponse.data)
       pointCloud.geometry.setAttribute(
         'position',
         new THREE.Float32BufferAttribute(position, 3)
       )
+      // pointCloud.geometry.setAttribute(
+      //   'color',
+      //   new THREE.Float32BufferAttribute(color, 3)
+      // )
     }
 
 
@@ -76,28 +80,68 @@ export default defineComponent({
       'position',
       new THREE.BufferAttribute(new Float32Array([0, 0, 0]), 3)
     )
-    const pointCloudMaterial = new THREE.PointsMaterial({
-      color: 0xffffff,
-      size: 1,
-      sizeAttenuation: false,
+    // const pointCloudMaterial = new THREE.PointsMaterial({
+    //   // vertexColors: true,
+    //   color: 0xffffff,
+    //   size: 1,
+    //   sizeAttenuation: false,
+    // })
+
+    const pointCloudMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 1.0 },
+        resolution: { value: new THREE.Vector2() },
+      },
+      vertexShader: `
+        varying vec3 vColor;
+        void main() {
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          gl_Position = projectionMatrix * mvPosition;
+          vColor = position;
+          gl_PointSize = 1.0;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        void main() {
+          gl_FragColor = vec4(1.0, 1.0 - sqrt(pow(vColor.x, 2.0) + pow(vColor.y, 2.0)) / 60.0, 1.0, 1.0);
+        }
+      `
     })
+
+
+
+
+
     const pointCloud = new THREE.Points(pointCloudGeometry, pointCloudMaterial)
     pointCloud.geometry.attributes.position.needsUpdate = true
 
+
+    // 解析点云数据 三个值一个点
     async function parsePointCloud(data) {
       const dataArray = new Float32Array(data)
       const position = new Float32Array(dataArray.length / 4 * 3)
+      const color = new Float32Array(dataArray.length / 4 * 3)
 
       for (let i = 0, n = 0; i < dataArray.length - 1; i += 4, n++) {
         position[i - n] = dataArray[i]
         position[i - n + 1] = dataArray[i + 1]
-        position[i - n + 2] = dataArray[i + 2]
+        position[i - n + 2] = dataArray[i + 2] + 2.0
+        // RGB 0到1
+        // color[i - n] = 1.0 - position[i - n + 2] / 2.0
+        // 另一种方案
+        // color[i - n + 1] = 1.0 - Math.abs(position[i - n] / 35.0) / 2.0 - Math.abs(position[i - n + 1] / 35.0) / 2.0 - Math.abs(position[i - n + 2] / 20.0)
+        // color[i - n + 1] = 1.0 - Math.sqrt(Math.abs(position[i - n]) ** 2 + Math.abs(position[i - n + 1]) ** 2) / 40.0
+        // color[i - n + 2] = 0.0
       }
 
       return {
         position,
+        color,
       }
     }
+
+
 
     // 当帧变化时，更新数据
     const frameChangeHandler = (frame) => {
@@ -125,22 +169,31 @@ export default defineComponent({
       // })
 
 
-      window.onresize = () => {
-        console.log('resize', window.innerWidth, window.innerHeight)
-        canvasObj.canvas.width = containerImage.value.clientWidth
-        canvasObj.canvas.height = containerImage.value.clientHeight
-        canvasObj.ctx.drawImage(state.image, 0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
-      }
+      // window.onresize = () => {
+      //   containerImage.value.style.width = '100%'
+      //   containerImage.value.style.height = '100%'
+      //   console.log('resize window', containerImage.value.clientWidth, containerImage.value.clientHeight)
+      //   canvasObj.ctx.clearRect(0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
+      //   canvasObj.canvas.width = containerImage.value.clientWidth
+      //   canvasObj.canvas.height = containerImage.value.clientHeight
+      //   console.log('canvas', canvasObj.canvas.width, canvasObj.canvas.height)
+      //   canvasObj.ctx.drawImage(state.image, 0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
+      // }
 
 
-
+      // 性能监视
       const stats = new Stats();
       stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
       document.body.appendChild(stats.dom);
 
 
 
-      console.log(containerLidar.value.clientHeight);
+      // GUI
+      const gui = new GUI();
+
+
+
+      // 初始化点云及控制器
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
       const renderer = new THREE.WebGLRenderer();
@@ -157,16 +210,15 @@ export default defineComponent({
       function animate() {
         requestAnimationFrame(animate);
         controls.update();
-
         stats.update();
-
         renderer.render(scene, camera);
       }
       animate();
 
 
-      fetchSingleData(timeRange[0])
 
+      // 开始获取数据
+      fetchSingleData(timeRange[0])
     });
 
     return {
@@ -200,6 +252,7 @@ export default defineComponent({
 
 <style>
 .main-page {
+  min-width: 1200px;
   width: 100%;
   height: auto;
 }
@@ -214,9 +267,9 @@ export default defineComponent({
 }
 
 .container-lidar {
-  flex: 0 0 480px;
+  flex: 0 0 680px;
   margin-right: 17px;
-  height: 480px;
+  height: 680px;
 }
 
 .container-lidar .canvas {
@@ -225,7 +278,9 @@ export default defineComponent({
 }
 
 .container-image {
-  flex: 1;
+  flex: 1 1 auto;
   height: 480px;
+
+  /* background-color: #ff6700; */
 }
 </style>
