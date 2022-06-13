@@ -195,7 +195,7 @@ export default defineComponent({
 
 
         const calcNowFrame = computed(() => {
-            let r = Number(((state.frame * 100) / (props.timeRange.length - 1)).toFixed(2)) - 1
+            const r = Number(((state.frame * 100) / (props.timeRange.length - 1)).toFixed(2))
             console.log('calcNowFrame', r)
             return r
         })
@@ -306,7 +306,7 @@ export default defineComponent({
                         </div>
                         <!-- TODO:进度条末端 -->
                         <div class="now-frame"
-                            :style="{ position: 'absolute', 'display': 'inline-block', 'left': calcNowFrame, height: '20px', width: '2px', 'background-color': 'green' }">
+                            :style="{ position: 'absolute',  'display': 'inline-block', 'left': calcNowFrame+'%', height: '20px', width: '2px', 'background-color': 'green' }">
                         </div>
                     </div>
                 </el-main>
