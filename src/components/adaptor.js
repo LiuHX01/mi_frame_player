@@ -1,23 +1,39 @@
 import mitt from 'mitt'
 
-const currentMap = new Map()
-currentMap.set('en', 'en')
+
 
 const emitter = mitt()
 
 
-export default class Adaptor extends OtherAdaptor {
-    constructor (namespace) {
+
+class FrameAdaptor {
+    constructor(namespace) {
         this.namespace = namespace
     }
 
 
     FramePlayerEmitter(data) {
         emitter.emit(this.namespace + 'FramePlayer', data)
+        // console.log(this.namespace + 'FramePlayer', data)
     }
-
+5
 
     FramePlayerListener(callback) {
-        emitter.on('FramePlayer', (data) => callback(data))
+        emitter.on(this.namespace + 'FramePlayer', (data) => callback(data))
+        // console.log(this.namespace + 'FramePlayerListener')
     }
+}
+
+
+
+const frameAdaptorImage = new FrameAdaptor('imageTransfer')
+const frameAdaptorLidar = new FrameAdaptor('lidarTransfer')
+const frameAdaptorReady = new FrameAdaptor('readyTransfer')
+
+
+
+export {
+    frameAdaptorImage,
+    frameAdaptorLidar,
+    frameAdaptorReady,
 }

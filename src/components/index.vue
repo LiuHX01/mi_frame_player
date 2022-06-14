@@ -1,5 +1,6 @@
 <script>
 import { defineComponent, computed, watch, ref, reactive, toRefs } from 'vue';
+import mitt from 'mitt';
 
 
 export default defineComponent({
@@ -62,7 +63,7 @@ export default defineComponent({
 
             let f = 0
 
-            console.log('start')
+            // console.log('start')
 
             const run = () => {
                 let playPerFrame = 1000
@@ -104,7 +105,7 @@ export default defineComponent({
         const stop = () => {
             state.isPlaying = false
 
-            console.log('stop')
+            // console.log('stop')
 
             if (state.timer) {
                 clearTimeout(state.timer)
@@ -115,7 +116,7 @@ export default defineComponent({
         const reset = () => {
             stop()
 
-            console.log('reset')
+            // console.log('reset')
 
             state.frame = 0
         }
@@ -124,7 +125,7 @@ export default defineComponent({
         const prevOneFrame = () => {
             stop()
 
-            console.log('prevOneFrame')
+            // console.log('prevOneFrame')
 
             if (state.frame > 0) {
                 state.frame -= 1
@@ -137,7 +138,7 @@ export default defineComponent({
         const nextOneFrame = () => {
             stop()
 
-            console.log('nextOneFrame')
+            // console.log('nextOneFrame')
 
             if (state.frame < props.timeRange.length - 1) {
                 state.frame += 1
