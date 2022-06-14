@@ -1,33 +1,32 @@
 <script>
-import { defineComponent, nextTick, onMounted, ref } from "vue";
+import { defineComponent, nextTick, onMounted, ref, reactive } from "vue";
 import { frameAdaptorImage } from './adaptor.js'
 
 export default defineComponent({
     name: 'FrameImage',
     setup() {
-        const image = ref('')
-
-
-        const arrayBufferToBase64 = (arrayBuffer) => {
-            let binary = '';
-            let bytes = new Uint8Array(arrayBuffer);
-            let len = bytes.byteLength;
-            for (let i = 0; i < len; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-            return window.btoa(binary);
-        }
-
+        const image = reactive(new Image())
+        const containerImage = ref(null)
 
         onMounted(() => {
+            const canvas = document.getElementById('canvas')
+            const ctx = canvas.getContext('2d')
+
+
             frameAdaptorImage.FramePlayerListener((data) => {
-                
-                image.value = `data:image/png;base64,${arrayBufferToBase64(data)}`
+                image.src = URL.createObjectURL(data)
+                image.onload = () => {
+                    canvas.width = containerImage.value.clientWidth
+                    canvas.height = containerImage.value.clientHeight
+                    ctx.clearRect(0, 0, canvas.width, canvas.height)
+                    ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
+                }
             })
         })
 
         return {
             image,
+            containerImage,
         }
 
     }
@@ -35,8 +34,21 @@ export default defineComponent({
 </script>
 
 <template>
-    <img :src="image" alt="">
+    <div ref="containerImage" class="container-image">
+        <canvas id="canvas"></canvas>
+        <!-- <img :src="image" alt=""> -->
+    </div>
 </template>
 
 <style>
+.container-image {
+    flex-grow: 1;
+    height: 600px;
+    margin-left: 10px;
+}
+
+.container-image canvas {
+    border-radius: 20px;
+
+}
 </style>

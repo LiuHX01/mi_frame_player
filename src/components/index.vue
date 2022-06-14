@@ -1,6 +1,7 @@
 <script>
 import { defineComponent, computed, watch, ref, reactive, toRefs } from 'vue';
 import mitt from 'mitt';
+import { xor } from 'lodash';
 
 
 export default defineComponent({
@@ -73,8 +74,6 @@ export default defineComponent({
                     playPerFrame = 1000 / 20
                 } else if (state.speed === 4) {
                     playPerFrame = 1000 / 40
-                } else if (state.speed === 6) {
-                    playPerFrame = 1000 / 60
                 }
 
                 if (state.timer) {
@@ -109,6 +108,15 @@ export default defineComponent({
 
             if (state.timer) {
                 clearTimeout(state.timer)
+            }
+        }
+
+
+        const clickToStartStop = () => {
+            if (state.isPlaying) {
+                stop()
+            } else {
+                start()
             }
         }
 
@@ -154,15 +162,35 @@ export default defineComponent({
 
 
         const upSpeed = () => {
-            if (state.speed < 4) {
-                state.speed += 2
+            switch (state.speed) {
+                case 1:
+                    state.speed = 2
+                    break
+                case 2:
+                    state.speed = 4
+                    break
+                case 4:
+                    state.speed = 1
+                    break
+                default:
+                    break
             }
         }
 
 
         const downSpeed = () => {
-            if (state.speed > 1) {
-                state.speed -= 2
+            switch (state.speed) {
+                case 1:
+                    state.speed = 4
+                    break
+                case 2:
+                    state.speed = 1
+                    break
+                case 4:
+                    state.speed = 2
+                    break
+                default:
+                    break
             }
         }
 
@@ -183,7 +211,7 @@ export default defineComponent({
 
             let target = Math.ceil((offsetX / sliderRef.value.clientWidth) * (props.timeRange.length))
             console.log('offsetX:', offsetX, 'target:', target)
-            if (target <= 2) {
+            if (target < 2) {
                 target = 0
             } else if (target >= props.timeRange.length - 2) {
                 target = props.timeRange.length - 1
@@ -193,30 +221,15 @@ export default defineComponent({
         }
 
 
-        const changeColor = (percentage) => {
-            if (percentage <= 20) {
-                return colors[0].color
-            } else if (percentage <= 40) {
-                return colors[1].color
-            } else if (percentage <= 60) {
-                return colors[2].color
-            } else if (percentage <= 80) {
-                return colors[3].color
-            } else {
-                return colors[4].color
-            }
-        }
-
-
         const calcLoadedFrame = computed(() => {
-            const r = `${((state.frame * 100) / (props.timeRange.length - 1)).toFixed(2)}%`
+            let x = ((state.frame * 100) / (props.timeRange.length - 1)).toFixed(2)
+            const r = `${x}%`
             return r
         })
 
 
         const calcNowFrame = computed(() => {
-            const r = Number(((state.frame * 100) / (props.timeRange.length - 1)).toFixed(2))
-            // console.log('calcNowFrame', r)
+            let r = Number(((state.frame * 100) / (props.timeRange.length - 1)).toFixed(2))
             return r
         })
 
@@ -238,164 +251,154 @@ export default defineComponent({
             sliderControl,
             prevOneFrame,
             nextOneFrame,
-            changeColor,
 
             calcLoadedFrame,
             calcNowFrame,
             sliderRef,
+            upSpeed,
+            downSpeed,
 
+            clickToStartStop,
         }
     },
 })
 </script>
 
 <template>
-    <div>
+    <div class="control-frame">
         <div class="control-panel">
-            <el-container>
-                <el-aside width="350px">
-                    <div class="control-panel-main">
-                        <div class="speed-control">
-                            <el-dropdown trigger="hover">
-                                <el-button type="primary">{{ state.speed }} x</el-button>
-                                <template #dropdown>
-                                    <el-dropdown-menu slot="dropdown">
-                                        <el-dropdown-item @click="speedChange(1)">1x</el-dropdown-item>
-                                        <el-dropdown-item @click="speedChange(2)">2x</el-dropdown-item>
-                                        <el-dropdown-item @click="speedChange(4)">4x</el-dropdown-item>
-                                        <el-dropdown-item @click="speedChange(6)">6x</el-dropdown-item>
-                                    </el-dropdown-menu>
-                                </template>
-                            </el-dropdown>
-                        </div>
+            <div class="speed-control">
+                <!-- <el-dropdown trigger="hover">
+                    <el-button type="primary">{{ state.speed }} x</el-button>
+                    <template #dropdown>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item @click="speedChange(1)">1x</el-dropdown-item>
+                            <el-dropdown-item @click="speedChange(2)">2x</el-dropdown-item>
+                            <el-dropdown-item @click="speedChange(4)">4x</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </template>
+                </el-dropdown> -->
+            </div>
 
 
-                        <div class="play-control">
-                            <el-button-group>
-                                <el-button @click="start">
-                                    <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8="">
-                                        <path fill="currentColor"
-                                            d="M512 64a448 448 0 1 1 0 896 448 448 0 0 1 0-896zm0 832a384 384 0 0 0 0-768 384 384 0 0 0 0 768zm-48-247.616L668.608 512 464 375.616v272.768zm10.624-342.656 249.472 166.336a48 48 0 0 1 0 79.872L474.624 718.272A48 48 0 0 1 400 678.336V345.6a48 48 0 0 1 74.624-39.936z">
-                                        </path>
-                                    </svg>
-                                </el-button>
-                                <el-button type="primary" @click="stop">
-                                    <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8="">
-                                        <path fill="currentColor"
-                                            d="M512 64a448 448 0 1 1 0 896 448 448 0 0 1 0-896zm0 832a384 384 0 0 0 0-768 384 384 0 0 0 0 768zm-96-544q32 0 32 32v256q0 32-32 32t-32-32V384q0-32 32-32zm192 0q32 0 32 32v256q0 32-32 32t-32-32V384q0-32 32-32z">
-                                        </path>
-                                    </svg>
-                                </el-button>
-                                <el-button type="primary" @click="reset">
-                                    <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8="">
-                                        <path fill="currentColor"
-                                            d="M771.776 794.88A384 384 0 0 1 128 512h64a320 320 0 0 0 555.712 216.448H654.72a32 32 0 1 1 0-64h149.056a32 32 0 0 1 32 32v148.928a32 32 0 1 1-64 0v-50.56zM276.288 295.616h92.992a32 32 0 0 1 0 64H220.16a32 32 0 0 1-32-32V178.56a32 32 0 0 1 64 0v50.56A384 384 0 0 1 896.128 512h-64a320 320 0 0 0-555.776-216.384z">
-                                        </path>
-                                    </svg>
-                                </el-button>
-                            </el-button-group>
-                        </div>
+            <div class="play-control">
+                <el-button-group>
+                    <el-button @click="downSpeed">
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8="">
+                            <path fill="currentColor"
+                                d="M529.408 149.376a29.12 29.12 0 0 1 41.728 0 30.592 30.592 0 0 1 0 42.688L259.264 511.936l311.872 319.936a30.592 30.592 0 0 1-.512 43.264 29.12 29.12 0 0 1-41.216-.512L197.76 534.272a32 32 0 0 1 0-44.672l331.648-340.224zm256 0a29.12 29.12 0 0 1 41.728 0 30.592 30.592 0 0 1 0 42.688L515.264 511.936l311.872 319.936a30.592 30.592 0 0 1-.512 43.264 29.12 29.12 0 0 1-41.216-.512L453.76 534.272a32 32 0 0 1 0-44.672l331.648-340.224z">
+                            </path>
+                        </svg>
+                    </el-button>
+                    <el-button @click="prevOneFrame">
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8="">
+                            <path fill="currentColor"
+                                d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z">
+                            </path>
+                        </svg>
+                    </el-button>
+                    <el-button @click="clickToStartStop">
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8="">
+                            <path fill="currentColor"
+                                d="M512 64a448 448 0 1 1 0 896 448 448 0 0 1 0-896zm0 832a384 384 0 0 0 0-768 384 384 0 0 0 0 768zm-48-247.616L668.608 512 464 375.616v272.768zm10.624-342.656 249.472 166.336a48 48 0 0 1 0 79.872L474.624 718.272A48 48 0 0 1 400 678.336V345.6a48 48 0 0 1 74.624-39.936z">
+                            </path>
+                        </svg>
+                        <span class="ss">&nbsp;/&nbsp;</span>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8="">
+                            <path fill="currentColor"
+                                d="M512 64a448 448 0 1 1 0 896 448 448 0 0 1 0-896zm0 832a384 384 0 0 0 0-768 384 384 0 0 0 0 768zm-96-544q32 0 32 32v256q0 32-32 32t-32-32V384q0-32 32-32zm192 0q32 0 32 32v256q0 32-32 32t-32-32V384q0-32 32-32z">
+                            </path>
+                        </svg>
+                    </el-button>
+                    <el-button @click="nextOneFrame">
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8="">
+                            <path fill="currentColor"
+                                d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z">
+                            </path>
+                        </svg>
+                    </el-button>
+                    <el-button @click="upSpeed">
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8="">
+                            <path fill="currentColor"
+                                d="M452.864 149.312a29.12 29.12 0 0 1 41.728.064L826.24 489.664a32 32 0 0 1 0 44.672L494.592 874.624a29.12 29.12 0 0 1-41.728 0 30.592 30.592 0 0 1 0-42.752L764.736 512 452.864 192a30.592 30.592 0 0 1 0-42.688zm-256 0a29.12 29.12 0 0 1 41.728.064L570.24 489.664a32 32 0 0 1 0 44.672L238.592 874.624a29.12 29.12 0 0 1-41.728 0 30.592 30.592 0 0 1 0-42.752L508.736 512 196.864 192a30.592 30.592 0 0 1 0-42.688z">
+                            </path>
+                        </svg>
+                    </el-button>
+                </el-button-group>
+            </div>
+        </div>
 
-                        <div class="frame-control">
-                            <el-button type="primary" @click="prevOneFrame">
-                                <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8="">
-                                    <path fill="currentColor"
-                                        d="M609.408 149.376 277.76 489.6a32 32 0 0 0 0 44.672l331.648 340.352a29.12 29.12 0 0 0 41.728 0 30.592 30.592 0 0 0 0-42.752L339.264 511.936l311.872-319.872a30.592 30.592 0 0 0 0-42.688 29.12 29.12 0 0 0-41.728 0z">
-                                    </path>
-                                </svg>
-                            </el-button>
-                            <el-button type="primary" @click="nextOneFrame">
-                                <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8="">
-                                    <path fill="currentColor"
-                                        d="M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z">
-                                    </path>
-                                </svg>
-                            </el-button>
-                        </div>
-                    </div>
-                </el-aside>
-                <!-- <div ref="sliderControl" class="slider-control" style="width: 50%;">
-                <el-progress :percentage="Number(state.percent.toFixed(1))" :text-inside="true" :stroke-width="26"
-                    :color="changeColor(state.percent)" :show-text="true" :duration="0" @click="clickFrame">
-                </el-progress>
-            </div> -->
-                <el-main>
-                    <div ref="sliderRef" class="my-slider-control" @click="clickFrame"
-                        style="width: 800px; height: 20px; background-color: aquamarine; position: relative; display:block">
-                        <div class="loaded-frame"
-                            :style="{ 'display': 'inline-block', width: calcLoadedFrame, 'background-color': 'red', height: '20px' }">
-                        </div>
-                        <!-- TODO:进度条末端 -->
-                        <div class="now-frame"
-                            :style="{ position: 'absolute', 'display': 'inline-block', 'left': calcNowFrame + '%', height: '20px', width: '2px', 'background-color': 'green' }">
-                        </div>
-                    </div>
-                </el-main>
-            </el-container>
-            <div>当前 {{ state.frame + 1 }} / {{ timeRange.length }} </div>
+        <div class="info">
+            Speed: x{{state.speed}}
+            <br>
+            Frame: {{state.frame}}/{{timeRange.length - 1}}
+        </div>
+
+        <div class="control-slider">
+            <div ref="sliderRef" class="my-slider-control" @click="clickFrame">
+                <div class="loaded-frame"
+                    :style="{ 'display': 'inline-block', width: calcLoadedFrame, 'background-color': '#B0BEC5', height: '20px', 'border-radius': '10px' }">
+                </div>
+                <!-- TODO:进度条末端 -->
+                <!-- <div class="now-frame"
+                    :style="{ position: 'absolute', 'display': 'inline-block', 'left': calcNowFrame + '%', height: '20px', width: '5px', 'background-color': '#fff'}">
+                </div> -->
+            </div>
         </div>
     </div>
 </template>
 
 <style>
-/*
-.control-panel {
-    margin-top: 10px;
+.control-frame {
+    height: 58px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    background-color: antiquewhite;
+    margin-top: 10px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+}
+
+.control-slider {
+    flex-grow: 1;
+    height: 20px;
+    margin-top: 18px;
+    margin-right: 20px;
+    background-color: #e0e0e0;
+    position: relative;
+    border-radius: 10px;
+}
+
+.control-panel {
+    flex-grow: 0;
+    width: 310px;
 }
 
 .speed-control {
+    margin-left: 20px;
+    padding-top: 10px;
+    padding-bottom: 12.7px;
     display: inline-block;
-    height: 100%;
 }
 
 .play-control {
+    padding-top: 13px;
     display: inline-block;
-    float: right;
 }
 
-.slider-control {
+.info {
+    width: 90px;
+    font-size: 8px;
+    margin-left: 15px;
+    margin-right: 20px;
+    padding-top: 5px;
+    line-height: 23px;
     display: inline-block;
-    float: right;
 }
 
-.frame-control {
-    display: inline-block;
-    float: right;
-}
-
-.el-button {
-    justify-content: space-between;
-    align-items: center;
-    padding-left: 10px;
-    padding-right: 10px;
-}
-*/
-
-.speed-control,
-.frame-control,
-.play-control {
-    display: inline-block;
-    /* line-height: 60px; */
-}
-
-
-.el-aside {
-    width: 100%;
-    height: 60px;
-    line-height: 60px;
-    background-color: #f5f5f5;
-    border-right: 2px solid #ebeef5;
-}
-
-.el-main {
-    width: 100%;
-    height: 60px;
-    background-color: #f5f5f5;
+.ss {
+    font-size: 16px;
+    line-height: 16px;
+    padding-top: 1px;
+    display: block;
 }
 
 svg {

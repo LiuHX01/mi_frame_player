@@ -14,13 +14,11 @@ class FrameAdaptor {
 
     FramePlayerEmitter(data) {
         emitter.emit(this.namespace + 'FramePlayer', data)
-        // console.log(this.namespace + 'FramePlayer', data)
     }
-5
+
 
     FramePlayerListener(callback) {
         emitter.on(this.namespace + 'FramePlayer', (data) => callback(data))
-        // console.log(this.namespace + 'FramePlayerListener')
     }
 }
 

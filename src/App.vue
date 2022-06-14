@@ -31,9 +31,8 @@ export default defineComponent({
 
 
     const fetchSingleData = async (timestamp) => {
-      console.log('fetchSingleData', timestamp)
       const imageResponse = await Axios.get(`/data/image_00/data/${timestamp}.png`, {
-        responseType: 'arraybuffer',
+        responseType: 'blob',
       })
 
       const lidarResponse = await Axios.get(`/data/velodyne_points/data/${timestamp}.bin`, {
@@ -49,7 +48,6 @@ export default defineComponent({
 
     // 当帧变化时，更新数据
     const frameChangeHandler = (frame) => {
-      console.log('frameChangeHandler', frame)
       // TODO:
       // state.frameReady = true
 
@@ -105,12 +103,8 @@ export default defineComponent({
 <template>
   <div class="main-page">
     <div class="container">
-      <div class="container-lidar">
         <frame-lidar></frame-lidar>
-      </div>
-      <div class="container-image">
         <frame-image></frame-image>
-      </div>
     </div>
     <div>
       <frame-player-control class="player-control" :timeRange="timeRange" @frame-change="frameChangeHandler">
@@ -122,38 +116,16 @@ export default defineComponent({
 
 <style>
 .main-page {
-  min-width: 1200px;
-  width: 100%;
-  height: auto;
-  background-color: #030303;
+  min-width: 1024px;
 }
 
 .container {
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: row;
+  justify-content: space-around;
   align-items: center;
-  justify-content: center;
-  /* border: 1px solid rgb(255, 0, 0); */
-}
-
-.container-lidar {
-  flex: 0 0 400px;
-  margin-right: 17px;
-  height: 400px;
-  border: 2px solid rgb(41, 39, 39);
-}
-
-.container-lidar .canvas {
-  width: 0%;
-  height: 0%;
-
-}
-
-.container-image {
-  flex: 1 1 auto;
-  height: 630px;
-  border: 2px solid rgb(41, 39, 39);
-  /* background-color: #ff6700; */
+  /* padding: 20px 20px 20px 20px; */
 }
 </style>

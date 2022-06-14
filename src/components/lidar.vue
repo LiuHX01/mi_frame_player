@@ -7,6 +7,8 @@ import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import gsap from 'gsap';
 
+
+
 export default defineComponent({
     name: 'FrameLidar',
     setup() {
@@ -14,12 +16,12 @@ export default defineComponent({
         const containerLidar = ref(null)
 
 
+
         const pointCloudGeometry = new THREE.BufferGeometry()
         pointCloudGeometry.setAttribute(
             'position',
             new THREE.BufferAttribute(new Float32Array([0, 0, 0]), 3)
         )
-
 
         const pointCloudMaterial = new THREE.ShaderMaterial({
             uniforms: {
@@ -43,10 +45,8 @@ export default defineComponent({
             `
         })
 
-
         const pointCloud = new THREE.Points(pointCloudGeometry, pointCloudMaterial)
         pointCloud.geometry.attributes.position.needsUpdate = true
-
 
         async function parsePointCloud(data) {
             const dataArray = new Float32Array(data)
@@ -65,12 +65,10 @@ export default defineComponent({
 
 
 
-
         onMounted(() => {
             const stats = new Stats();
             stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
             document.body.appendChild(stats.dom);
-
 
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -92,8 +90,6 @@ export default defineComponent({
                 renderer.render(scene, camera);
             }
             animate();
-
-
 
             // GUI
             const EView = {
@@ -117,10 +113,9 @@ export default defineComponent({
             })
 
 
-
             frameAdaptorLidar.FramePlayerListener(async (data) => {
                 lidar.value = data
-                const { position } = await parsePointCloud(data)
+                const { position } = await parsePointCloud(lidar.value)
                 pointCloud.geometry.setAttribute(
                     'position',
                     new THREE.Float32BufferAttribute(position, 3)
@@ -137,8 +132,19 @@ export default defineComponent({
 </script>
 
 <template>
-    <div ref="containerLidar" class="lidar" style="height: 400px; width: 400px"></div>
+    <div ref="containerLidar" class="container-lidar"></div>
 </template>
 
 <style>
+.container-lidar {
+    flex-grow: 0;
+    width: 600px;
+    min-width: 600px;
+    height: 600px;
+}
+
+.container-lidar canvas {
+    border-radius: 20px;
+
+}
 </style>
