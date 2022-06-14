@@ -9,18 +9,22 @@ import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls
 import gsap from 'gsap';
 // import elementResizeDetectorMaker from 'element-resize-detector';
 
+// TODO:
+// import FrameAdaptor from './components/adaptor';
+// import FrameImage from './components/image';
 
 
 export default defineComponent({
   // 使用该组件
   components: {
-    'frame-player-control': framePlayerControl
+    'frame-player-control': framePlayerControl,
+    // 'frame-image': FrameImage,
   },
 
 
   setup() {
     const containerLidar = ref(null)
-    const containerImage = ref(null)
+    const containerImage = ref(null) 
 
     const state = reactive({
       lidar: [],
@@ -44,6 +48,7 @@ export default defineComponent({
     const timeRange = getAllImageName()
 
 
+    // const position = new Float32Array
 
     // 获得一帧数据
     const fetchSingleData = async (timestamp) => {
@@ -55,6 +60,9 @@ export default defineComponent({
         responseType: 'arraybuffer'
       })
 
+      // TODO:
+      // FrameAdaptor.FramePlayerEmitter(URL.createObjectURL(imageResponse.data))
+
       state.image.src = URL.createObjectURL(imageResponse.data)
       state.image.onload = (async () => {
         canvasObj.ctx.clearRect(0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
@@ -63,7 +71,7 @@ export default defineComponent({
         canvasObj.ctx.drawImage(imageBitmap, 0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
       })
 
-      const { position, color } = await parsePointCloud(lidarResponse.data)
+      const { position } = await parsePointCloud(lidarResponse.data)
       pointCloud.geometry.setAttribute(
         'position',
         new THREE.Float32BufferAttribute(position, 3)
@@ -135,7 +143,7 @@ export default defineComponent({
 
       return {
         position,
-        color,
+        // color,
       }
     }
 
@@ -143,6 +151,15 @@ export default defineComponent({
 
     // 当帧变化时，更新数据
     const frameChangeHandler = (frame) => {
+
+      // TODO:
+      // state.frameReady = true
+
+      // watch([...state, frameReady], () => {
+      //   state = false
+      //   fetchSingleData()
+      // })
+
       fetchSingleData(timeRange[frame])
     }
 
@@ -154,6 +171,8 @@ export default defineComponent({
     onMounted(() => {
       console.log('onMounted');
 
+      // console.log(requestAnimationFrame())
+
       canvasObj.canvas = document.getElementById('canvas');
       canvasObj.ctx = canvas.getContext('2d');
 
@@ -164,6 +183,23 @@ export default defineComponent({
       //   canvasObj.canvas.width = containerImage.value.clientWidth
       //   canvasObj.canvas.height = containerImage.value.clientHeight
       //   canvasObj.ctx.drawImage(state.image, 0, 0, canvasObj.canvas.width, canvasObj.canvas.height)
+      // })
+
+
+      // TODO:
+      // frameAdaptor.FramePlayerListener((data) => {
+      //   image.loadStatueImage = true
+      // })
+      // frameAdaptor.FramePlayerListener((data) => {
+      //   image.loadStatueLidar = true
+      // })
+      // watch([...state], () => {
+      //   state = false
+      //   fetchSingleData()
+      // })
+      //
+      // nextTick(() => {
+        // listener
       // })
 
 
@@ -254,6 +290,7 @@ export default defineComponent({
       frameChangeHandler,
       containerLidar,
       containerImage,
+      // position,
     }
   },
 });
@@ -265,7 +302,7 @@ export default defineComponent({
     <div class="container">
       <div ref="containerLidar" class="container-lidar"></div>
       <div ref="containerImage" class="container-image">
-        <canvas id="canvas"></canvas>
+        <canvas id="canvas" @onload="successOnloadHandler"></canvas>
       </div>
     </div>
     <div>
@@ -293,9 +330,9 @@ export default defineComponent({
 }
 
 .container-lidar {
-  flex: 0 0 680px;
+  flex: 0 0 630px;
   margin-right: 17px;
-  height: 680px;
+  height: 630px;
 }
 
 .container-lidar .canvas {

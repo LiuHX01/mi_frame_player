@@ -9,9 +9,25 @@ export default defineComponent({
     props: {
         timeRange: {
             type: Array,
-            default: () => []
+            default: () => [],
+        },
+
+        frameLoadedRange: {
+            type: Array,
+            default: () => [0, 0],
+        },
+
+        locked: {
+            type: Boolean,
+            default: () => false,
+        },
+
+        disabled: {
+            type: Boolean,
+            default: () => false,
         },
     },
+
 
 
     emits: ['frame-change'],
@@ -38,7 +54,8 @@ export default defineComponent({
 
         const sliderControl = ref(null)
         const sliderRef = ref(null)
-        // const format = (state.percent) => (state.percent === 100 ? 'Done' : `${state.percent}%`)
+
+        const { disabled } = toRefs(props)
 
         const start = () => {
             state.isPlaying = true
@@ -309,11 +326,12 @@ export default defineComponent({
                         </div>
                         <!-- TODO:进度条末端 -->
                         <div class="now-frame"
-                            :style="{ position: 'absolute',  'display': 'inline-block', 'left': calcNowFrame+'%', height: '20px', width: '2px', 'background-color': 'green' }">
+                            :style="{ position: 'absolute', 'display': 'inline-block', 'left': calcNowFrame + '%', height: '20px', width: '2px', 'background-color': 'green' }">
                         </div>
                     </div>
                 </el-main>
             </el-container>
+            <div>当前 {{ state.frame + 1 }} / {{ timeRange.length }} </div>
         </div>
     </div>
 </template>
