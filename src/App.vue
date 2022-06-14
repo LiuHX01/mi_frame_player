@@ -126,6 +126,7 @@ export default defineComponent({
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
+  margin-top: 20px;
   /* padding: 20px 20px 20px 20px; */
 }
 </style>

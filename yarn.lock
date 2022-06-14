@@ -329,6 +329,11 @@
   dependencies:
     "has" "^1.0.3"
 
+"keymaster@^1.6.2":
+  "integrity" "sha512-OvA/AALN8IDKKkTk2Z+bDrzs/SQao4lo/QPbwSdDvm+frxfiYiYCSn1aHFUypJY3SruAO1y/c771agBmTXqUtg=="
+  "resolved" "https://registry.npmjs.org/keymaster/-/keymaster-1.6.2.tgz"
+  "version" "1.6.2"
+
 "lodash-es@*", "lodash-es@^4.17.21":
   "integrity" "sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw=="
   "resolved" "https://registry.npmjs.org/lodash-es/-/lodash-es-4.17.21.tgz"

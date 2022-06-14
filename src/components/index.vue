@@ -1,7 +1,6 @@
 <script>
 import { defineComponent, computed, watch, ref, reactive, toRefs } from 'vue';
-import mitt from 'mitt';
-import { xor } from 'lodash';
+import key from 'keymaster'
 
 
 export default defineComponent({
@@ -240,6 +239,13 @@ export default defineComponent({
         })
 
 
+        key('space', clickToStartStop)
+        key('left', prevOneFrame)
+        key('right', nextOneFrame)
+        key('up', upSpeed)
+        key('down', downSpeed)
+
+
         return {
             state,
             start,
@@ -337,7 +343,7 @@ export default defineComponent({
         <div class="control-slider">
             <div ref="sliderRef" class="my-slider-control" @click="clickFrame">
                 <div class="loaded-frame"
-                    :style="{ 'display': 'inline-block', width: calcLoadedFrame, 'background-color': '#B0BEC5', height: '20px', 'border-radius': '10px' }">
+                    :style="{ 'display': 'inline-block', width: calcLoadedFrame, 'background-color': '#B39DDB', height: '20px', 'border-radius': '10px' }">
                 </div>
                 <!-- TODO:进度条末端 -->
                 <!-- <div class="now-frame"

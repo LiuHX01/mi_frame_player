@@ -93,8 +93,8 @@ export default defineComponent({
 
             // GUI
             const EView = {
-                viewA: 'viewA',
-                viewB: 'viewB',
+                viewA: 'overlook',
+                viewB: 'car roof',
             }
             const gui = new GUI();
             const settings = {
