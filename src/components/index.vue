@@ -70,7 +70,12 @@ export default defineComponent({
                 }
 
                 if (state.frame < props.timeRange.length - 1) {
-                    state.frame += 1
+                    if (frameLoadedRange.value < state.frame + 1) {
+                        f = 1
+                        stop()
+                    } else {
+                        state.frame += 1
+                    }
                 } else {
                     state.frame = 0
                     f = 1
@@ -122,12 +127,12 @@ export default defineComponent({
         const prevOneFrame = () => {
             stop()
 
-            // console.log('prevOneFrame')
-
             if (state.frame > 0) {
                 state.frame -= 1
             } else {
-                state.frame = props.timeRange.length - 1
+                if (props.timeRange.length - 1 === frameLoadedRange.value) {
+                    state.frame = props.timeRange.length - 1
+                }
             }
         }
 
@@ -135,10 +140,10 @@ export default defineComponent({
         const nextOneFrame = () => {
             stop()
 
-            // console.log('nextOneFrame')
-
             if (state.frame < props.timeRange.length - 1) {
-                state.frame += 1
+                if (frameLoadedRange.value >= state.frame + 1) {
+                    state.frame += 1
+                }
             } else {
                 state.frame = 0
             }

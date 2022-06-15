@@ -34,8 +34,10 @@ export default defineComponent({
 
     const imageMap = new Map()
     const lidarMap = new Map()
+    const bitmapMap = new Map()
 
 
+    const worker = new Worker('/worker.js')
 
 
     const fetchSingleData = (timestamp) => {
@@ -48,7 +50,7 @@ export default defineComponent({
       //   responseType: 'arraybuffer'
       // })
       // console.log(imageMap, lidarMap)
-      frameAdaptorImage.FramePlayerEmitter(imageMap.get(timestamp))
+      frameAdaptorImage.FramePlayerEmitter([imageMap.get(timestamp), bitmapMap.get(timestamp)])
       frameAdaptorLidar.FramePlayerEmitter(lidarMap.get(timestamp))
     }
 
@@ -78,6 +80,11 @@ export default defineComponent({
           responseType: 'blob',
         })
 
+        worker.postMessage(imageResponse.data)
+        await worker.addEventListener('message',(e) => {
+          // console.log(timestamp, e.data[0], e.data[1])
+          bitmapMap.set(timestamp, e.data[0])
+        })
         // const imageBitmap = await createImageBitmap(imageResponse.data)
         // console.log(imageBitmap)
         
@@ -90,15 +97,14 @@ export default defineComponent({
         lidarMap.set(timestamp, lidarResponse.data)
 
 
+        frameAdaptorFRange.FramePlayerEmitter(i)
+
+
         if (timestamp === timeRange[0]) {
-          // console.log(imageMap)
           fetchSingleData(timeRange[0])
         }
-
-        frameAdaptorFRange.FramePlayerEmitter(i)
-        // console.log(frameLoadedRange)
       }
-      console.log('Done', imageMap, lidarMap)
+      console.log('Done', imageMap, lidarMap, bitmapMap)
     }
 
 
@@ -146,6 +152,7 @@ export default defineComponent({
   <div class="main-page">
     <div class="container">
       <frame-lidar></frame-lidar>
+      <!-- <frame-lidar></frame-lidar> -->
       <frame-image></frame-image>
     </div>
     <div>

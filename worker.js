@@ -22,8 +22,6 @@ const fetchSingleImage = (timestamp) => {
     }
 }
 
-
-// 为啥- -
 const fetchSingleLidar = (timestamp) => {
     var ajax = new XMLHttpRequest()
     ajax.open('GET', `/data/velodyne_points/data/${timestamp}.bin`, true)
@@ -39,10 +37,12 @@ const fetchSingleLidar = (timestamp) => {
 // for(let i = 0; i < timeRange.length; i++) {
 //     fetchSingleImage(timeRange[i])
 // }
+let i = 1
 
 self.addEventListener('message', async function (e) {
     const bitmapImage = await this.createImageBitmap(e.data)    // self.postMessage(bitImg)
-    self.postMessage(bitmapImage)
+    self.postMessage([bitmapImage, i])
+    i++
 })
 
 // close()
