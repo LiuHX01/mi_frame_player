@@ -29,18 +29,22 @@ export default defineComponent({
     const timeRange = getAllImageName()
 
 
+    const imageMap = new Map()
+    const lidarMap = new Map()
 
-    const fetchSingleData = async (timestamp) => {
-      const imageResponse = await Axios.get(`/data/image_00/data/${timestamp}.png`, {
-        responseType: 'blob',
-      })
 
-      const lidarResponse = await Axios.get(`/data/velodyne_points/data/${timestamp}.bin`, {
-        responseType: 'arraybuffer'
-      })
+    const fetchSingleData = (timestamp) => {
+    // const fetchSingleData = async (timestamp) => {
+      // const imageResponse = await Axios.get(`/data/image_00/data/${timestamp}.png`, {
+      //   responseType: 'blob',
+      // })
 
-      frameAdaptorImage.FramePlayerEmitter(imageResponse.data)
-      frameAdaptorLidar.FramePlayerEmitter(lidarResponse.data)
+      // const lidarResponse = await Axios.get(`/data/velodyne_points/data/${timestamp}.bin`, {
+      //   responseType: 'arraybuffer'
+      // })
+      // console.log(imageMap, lidarMap)
+      frameAdaptorImage.FramePlayerEmitter(imageMap.get(timestamp))
+      frameAdaptorLidar.FramePlayerEmitter(lidarMap.get(timestamp))
     }
 
 
@@ -60,6 +64,25 @@ export default defineComponent({
     }
 
 
+
+
+    const preLoadData = async () => {
+      for (let i = 0; i < timeRange.length; i++) {
+        const timestamp = timeRange[i]
+        const imageResponse = await Axios.get(`/data/image_00/data/${timestamp}.png`, {
+          responseType: 'blob',
+        })
+
+        const lidarResponse = await Axios.get(`/data/velodyne_points/data/${timestamp}.bin`, {
+          responseType: 'arraybuffer'
+        })
+
+        imageMap.set(timestamp, imageResponse.data)
+        lidarMap.set(timestamp, lidarResponse.data)
+      }
+      console.log('Done', imageMap, lidarMap)
+      fetchSingleData(timeRange[0])
+    }
 
 
 
@@ -86,7 +109,8 @@ export default defineComponent({
       // listener
       // })
       // 开始获取数据
-      fetchSingleData(timeRange[0])
+
+      preLoadData()
     });
 
     return {
@@ -103,8 +127,8 @@ export default defineComponent({
 <template>
   <div class="main-page">
     <div class="container">
-        <frame-lidar></frame-lidar>
-        <frame-image></frame-image>
+      <frame-lidar></frame-lidar>
+      <frame-image></frame-image>
     </div>
     <div>
       <frame-player-control class="player-control" :timeRange="timeRange" @frame-change="frameChangeHandler">
