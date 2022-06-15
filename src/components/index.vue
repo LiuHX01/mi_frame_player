@@ -1,7 +1,7 @@
 <script>
 import { defineComponent, computed, watch, ref, reactive, toRefs, onMounted } from 'vue';
 import { frameAdaptorFRange } from './adaptor.js';
-import key from 'keymaster'
+import hotkeys from 'hotkeys-js'
 
 export default defineComponent({
     name: 'framePlayerControl',
@@ -243,12 +243,11 @@ export default defineComponent({
         })
 
 
-        key('space', clickToStartStop)
-        key('left', prevOneFrame)
-        key('right', nextOneFrame)
-        key('up', upSpeed)
-        key('down', downSpeed)
-
+        hotkeys('space', clickToStartStop)
+        hotkeys('left', prevOneFrame)
+        hotkeys('right', nextOneFrame)
+        hotkeys('up', upSpeed)
+        hotkeys('down', downSpeed)
 
         return {
             state,

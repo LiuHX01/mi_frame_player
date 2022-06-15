@@ -36,6 +36,8 @@ export default defineComponent({
     const lidarMap = new Map()
 
 
+
+
     const fetchSingleData = (timestamp) => {
     // const fetchSingleData = async (timestamp) => {
       // const imageResponse = await Axios.get(`/data/image_00/data/${timestamp}.png`, {
@@ -77,6 +79,8 @@ export default defineComponent({
         })
 
         // const imageBitmap = await createImageBitmap(imageResponse.data)
+        // console.log(imageBitmap)
+        
 
         const lidarResponse = await Axios.get(`/data/velodyne_points/data/${timestamp}.bin`, {
           responseType: 'arraybuffer'
@@ -84,16 +88,13 @@ export default defineComponent({
 
         imageMap.set(timestamp, imageResponse.data)
         lidarMap.set(timestamp, lidarResponse.data)
-        
-
-        console.log(timestamp)
 
 
         if (timestamp === timeRange[0]) {
+          // console.log(imageMap)
           fetchSingleData(timeRange[0])
         }
 
-        // frameLoadedRange = i
         frameAdaptorFRange.FramePlayerEmitter(i)
         // console.log(frameLoadedRange)
       }

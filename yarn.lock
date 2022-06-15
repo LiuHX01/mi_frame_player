@@ -322,6 +322,11 @@
   dependencies:
     "function-bind" "^1.1.1"
 
+"hotkeys-js@^3.9.4":
+  "integrity" "sha512-2zuLt85Ta+gIyvs4N88pCYskNrxf1TFv3LR9t5mdAZIX8BcgQQ48F2opUptvHa6m8zsy5v/a0i9mWzTrlNWU0Q=="
+  "resolved" "https://registry.npmjs.org/hotkeys-js/-/hotkeys-js-3.9.4.tgz"
+  "version" "3.9.4"
+
 "is-core-module@^2.8.1":
   "integrity" "sha512-+5FPy5PnwmO3lvfMb0AsoPaBG+5KHUI0wYFXOtYPnVVVspTFUuMZNfNaNVRt3FZadstu2c8x23vykRW/NBoU6A=="
   "resolved" "https://registry.npmjs.org/is-core-module/-/is-core-module-2.9.0.tgz"

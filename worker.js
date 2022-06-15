@@ -1,3 +1,4 @@
+/*
 const getAllImageName = () => {
     const timeRange = []
     for (let i = 0; i <= 107; i++) {
@@ -34,15 +35,14 @@ const fetchSingleLidar = (timestamp) => {
     }
 }
 
-
-
+*/
 // for(let i = 0; i < timeRange.length; i++) {
 //     fetchSingleImage(timeRange[i])
 // }
 
-self.addEventListener('message', function (e) {
-    const bitImg = this.createImageBitmap
-    // console.log(e.data, 'world')
+self.addEventListener('message', async function (e) {
+    const bitmapImage = await this.createImageBitmap(e.data)    // self.postMessage(bitImg)
+    self.postMessage(bitmapImage)
 })
 
 // close()
