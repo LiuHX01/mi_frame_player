@@ -21,13 +21,13 @@ export default defineComponent({
                 // worker.postMessage(data)
                 // worker.addEventListener('message', (e) => {
                 //     bm = e.data  
-                // })
+                // })                
                 image.onload = () => {
                     canvas.width = containerImage.value.clientWidth
                     canvas.height = containerImage.value.clientHeight
                     ctx.clearRect(0, 0, canvas.width, canvas.height)
                     // console.log(typeof data[1])
-                    ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
+                    ctx.drawImage(data[1], 0, 0, canvas.width, canvas.height)
                 }
             })
         })

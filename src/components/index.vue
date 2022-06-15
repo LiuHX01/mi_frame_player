@@ -236,8 +236,8 @@ export default defineComponent({
 
 
         watch(() => state.frame, () => {
-            calcPercent(),
-                emit('frame-change', state.frame)
+            // calcPercent(),
+            emit('frame-change', state.frame)
         })
 
 

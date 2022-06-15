@@ -1,10 +1,12 @@
 <script>
-import { defineComponent, ref, reactive, toRefs, onMounted } from "vue";
+import { defineComponent, ref, reactive, toRefs, onMounted, watch } from "vue";
 import framePlayerControl from './components/index.vue';
 import Axios from 'axios';
 import { frameAdaptorImage, frameAdaptorLidar, frameAdaptorReady, frameAdaptorFRange } from './components/adaptor.js';
 import FrameImage from './components/image.vue';
 import FrameLidar from './components/lidar.vue';
+import { computed } from "@vue/reactivity";
+import { min } from "lodash";
 
 
 export default defineComponent({
@@ -29,19 +31,22 @@ export default defineComponent({
     const timeRange = getAllImageName()
 
 
-    let frameLoadedRange = ref(0)
+    let frameLoaded = ref(1)
 
 
     const imageMap = new Map()
     const lidarMap = new Map()
     const bitmapMap = new Map()
+    let imLen = ref(0)
+    let lmLen = ref(0)
+    let bmLen = ref(0)
 
 
     const worker = new Worker('/worker.js')
 
 
     const fetchSingleData = (timestamp) => {
-    // const fetchSingleData = async (timestamp) => {
+      // const fetchSingleData = async (timestamp) => {
       // const imageResponse = await Axios.get(`/data/image_00/data/${timestamp}.png`, {
       //   responseType: 'blob',
       // })
@@ -50,6 +55,7 @@ export default defineComponent({
       //   responseType: 'arraybuffer'
       // })
       // console.log(imageMap, lidarMap)
+      // console.log(imageMap.get(timestamp), bitmapMap.get(timestamp))
       frameAdaptorImage.FramePlayerEmitter([imageMap.get(timestamp), bitmapMap.get(timestamp)])
       frameAdaptorLidar.FramePlayerEmitter(lidarMap.get(timestamp))
     }
@@ -69,7 +75,29 @@ export default defineComponent({
 
       fetchSingleData(timeRange[frame])
     }
+    
 
+
+    watch(() => [imLen.value, bmLen.value, lmLen.value], () => {
+      if (imLen.value > bmLen.value) {
+        if (bmLen.value > lmLen.value) {
+          frameLoaded.value = lmLen.value
+        } else {
+          frameLoaded.value = bmLen.value
+        }
+      } else { // im <
+        if (imLen.value > lmLen.value) {
+          frameLoaded.value = lmLen.value
+        } else {
+          frameLoaded.value = imLen.value
+        }
+      }
+
+      frameLoaded.value--
+
+      console.log(imLen.value, lmLen.value, bmLen.value, frameLoaded.value)
+      frameAdaptorFRange.FramePlayerEmitter(frameLoaded.value)
+    })
 
 
 
@@ -80,38 +108,36 @@ export default defineComponent({
           responseType: 'blob',
         })
 
-        worker.postMessage(imageResponse.data)
-        await worker.addEventListener('message',(e) => {
-          // console.log(timestamp, e.data[0], e.data[1])
-          bitmapMap.set(timestamp, e.data[0])
-        })
-        // const imageBitmap = await createImageBitmap(imageResponse.data)
-        // console.log(imageBitmap)
-        
+        worker.postMessage([timestamp, imageResponse.data])
 
         const lidarResponse = await Axios.get(`/data/velodyne_points/data/${timestamp}.bin`, {
           responseType: 'arraybuffer'
         })
 
         imageMap.set(timestamp, imageResponse.data)
+        imLen.value = imageMap.size
         lidarMap.set(timestamp, lidarResponse.data)
+        lmLen.value = lidarMap.size
 
 
-        frameAdaptorFRange.FramePlayerEmitter(i)
+        
 
 
         if (timestamp === timeRange[0]) {
+          const frameZeroBitmap = await createImageBitmap(imageResponse.data)
+          bitmapMap.set(timestamp, frameZeroBitmap)
+          bmLen.value = bitmapMap.size
           fetchSingleData(timeRange[0])
         }
       }
-      console.log('Done', imageMap, lidarMap, bitmapMap)
+      console.log('Done', imageMap, lidarMap, bitmapMap, imLen.value, lmLen.value, bmLen.value)
     }
 
 
 
     // 挂载时，初始化数据
     onMounted(() => {
-      console.log('onMounted');
+      console.log('APP onMounted');
 
       // console.log(requestAnimationFrame())
 
@@ -133,7 +159,14 @@ export default defineComponent({
       // })
       // 开始获取数据
 
+      worker.addEventListener('message', (e) => {
+        bitmapMap.set(e.data[0], e.data[1])
+        bmLen.value = bitmapMap.size
+      })
+
       preLoadData()
+      // console.log('Done', imageMap, lidarMap, bitmapMap)
+
     });
 
     return {
@@ -141,7 +174,15 @@ export default defineComponent({
       frameChangeHandler,
       fetchSingleData,
 
-      frameLoadedRange,
+      frameLoaded,
+      imageMap,
+      lidarMap,
+      bitmapMap,
+      imLen,
+      lmLen,
+      bmLen,
+      worker,
+
     }
   },
 });
@@ -156,7 +197,8 @@ export default defineComponent({
       <frame-image></frame-image>
     </div>
     <div>
-      <frame-player-control class="player-control" :timeRange="timeRange" :frameLoadedRange="frameLoadedRange" @frame-change="frameChangeHandler">
+      <frame-player-control class="player-control" :timeRange="timeRange"
+        @frame-change="frameChangeHandler">
       </frame-player-control>
     </div>
   </div>
@@ -176,6 +218,5 @@ export default defineComponent({
   justify-content: space-around;
   align-items: center;
   margin-top: 20px;
-  /* padding: 20px 20px 20px 20px; */
 }
 </style>

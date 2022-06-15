@@ -7,8 +7,8 @@ const getAllImageName = () => {
     return timeRange
 }
 const timeRange = getAllImageName()
-
-
+*/
+/*
 const fetchSingleImage = (timestamp) => {
     var ajax = new XMLHttpRequest()
     ajax.open('GET', `/data/image_00/data/${timestamp}.png`, true)
@@ -37,12 +37,21 @@ const fetchSingleLidar = (timestamp) => {
 // for(let i = 0; i < timeRange.length; i++) {
 //     fetchSingleImage(timeRange[i])
 // }
-let i = 1
+// let i = 1
 
-self.addEventListener('message', async function (e) {
-    const bitmapImage = await this.createImageBitmap(e.data)    // self.postMessage(bitImg)
-    self.postMessage([bitmapImage, i])
-    i++
+// self.addEventListener('message', async function (e) {
+//     const bitmapImage = await this.createImageBitmap(e.data[0])    // self.postMessage(bitImg)
+//     self.postMessage([bitmapImage, i, e.data[1]])
+//     i++
+// })
+
+
+self.addEventListener('message', async (e) => {
+    const timestamp = e.data[0]
+    const imgData = e.data[1]
+    const bitmapImage = await createImageBitmap(imgData)
+    self.postMessage([timestamp, bitmapImage])
 })
+
 
 // close()
