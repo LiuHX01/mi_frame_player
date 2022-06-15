@@ -2,7 +2,7 @@
 import { defineComponent, ref, reactive, toRefs, onMounted } from "vue";
 import framePlayerControl from './components/index.vue';
 import Axios from 'axios';
-import { frameAdaptorImage, frameAdaptorLidar, frameAdaptorReady } from './components/adaptor.js';
+import { frameAdaptorImage, frameAdaptorLidar, frameAdaptorReady, frameAdaptorFRange } from './components/adaptor.js';
 import FrameImage from './components/image.vue';
 import FrameLidar from './components/lidar.vue';
 
@@ -27,6 +27,9 @@ export default defineComponent({
       return timeRange
     }
     const timeRange = getAllImageName()
+
+
+    let frameLoadedRange = ref(0)
 
 
     const imageMap = new Map()
@@ -73,15 +76,28 @@ export default defineComponent({
           responseType: 'blob',
         })
 
+        // const imageBitmap = await createImageBitmap(imageResponse.data)
+
         const lidarResponse = await Axios.get(`/data/velodyne_points/data/${timestamp}.bin`, {
           responseType: 'arraybuffer'
         })
 
         imageMap.set(timestamp, imageResponse.data)
         lidarMap.set(timestamp, lidarResponse.data)
+        
+
+        console.log(timestamp)
+
+
+        if (timestamp === timeRange[0]) {
+          fetchSingleData(timeRange[0])
+        }
+
+        // frameLoadedRange = i
+        frameAdaptorFRange.FramePlayerEmitter(i)
+        // console.log(frameLoadedRange)
       }
       console.log('Done', imageMap, lidarMap)
-      fetchSingleData(timeRange[0])
     }
 
 
@@ -118,6 +134,7 @@ export default defineComponent({
       frameChangeHandler,
       fetchSingleData,
 
+      frameLoadedRange,
     }
   },
 });
@@ -131,7 +148,7 @@ export default defineComponent({
       <frame-image></frame-image>
     </div>
     <div>
-      <frame-player-control class="player-control" :timeRange="timeRange" @frame-change="frameChangeHandler">
+      <frame-player-control class="player-control" :timeRange="timeRange" :frameLoadedRange="frameLoadedRange" @frame-change="frameChangeHandler">
       </frame-player-control>
     </div>
   </div>

@@ -1,7 +1,7 @@
 <script>
-import { defineComponent, computed, watch, ref, reactive, toRefs } from 'vue';
+import { defineComponent, computed, watch, ref, reactive, toRefs, onMounted } from 'vue';
+import { frameAdaptorFRange } from './adaptor.js';
 import key from 'keymaster'
-
 
 export default defineComponent({
     name: 'framePlayerControl',
@@ -11,11 +11,6 @@ export default defineComponent({
         timeRange: {
             type: Array,
             default: () => [],
-        },
-
-        frameLoadedRange: {
-            type: Array,
-            default: () => [0, 0],
         },
 
         locked: {
@@ -44,13 +39,7 @@ export default defineComponent({
         })
 
 
-        // const colors = [
-        //     { color: '#f56c6c', percentage: 0 },
-        //     { color: '#e6a23c', percentage: 20 },
-        //     { color: '#5cb87a', percentage: 40 },
-        //     { color: '#1989fa', percentage: 60 },
-        //     { color: '#6f7ad3', percentage: 80 },
-        // ]
+        let frameLoadedRange = ref(0)
 
 
         const sliderControl = ref(null)
@@ -66,6 +55,7 @@ export default defineComponent({
             // console.log('start')
 
             const run = () => {
+                // console.log(props.frameLoadedRange)
                 let playPerFrame = 1000
                 if (state.speed === 1) {
                     playPerFrame = 1000 / 10
@@ -82,7 +72,7 @@ export default defineComponent({
                 if (state.frame < props.timeRange.length - 1) {
                     state.frame += 1
                 } else {
-                    // state.frame = 0
+                    state.frame = 0
                     f = 1
                 }
 
@@ -209,12 +199,19 @@ export default defineComponent({
             const { offsetX } = $event
 
             let target = Math.ceil((offsetX / sliderRef.value.clientWidth) * (props.timeRange.length))
-            console.log('offsetX:', offsetX, 'target:', target)
-            if (target < 2) {
+            // console.log('offsetX:', offsetX, 'target:', target)
+
+            if (target <= 1) {
                 target = 0
             } else if (target >= props.timeRange.length - 2) {
                 target = props.timeRange.length - 1
             }
+
+
+            if (target > frameLoadedRange.value) {
+                target = frameLoadedRange.value
+            }
+
 
             jumpFrame(target)
         }
@@ -236,6 +233,13 @@ export default defineComponent({
         watch(() => state.frame, () => {
             calcPercent(),
                 emit('frame-change', state.frame)
+        })
+
+
+        onMounted(() => {
+            frameAdaptorFRange.FramePlayerListener((data) => {
+                frameLoadedRange.value = data
+            })
         })
 
 
@@ -335,9 +339,9 @@ export default defineComponent({
         </div>
 
         <div class="info">
-            Speed: x{{state.speed}}
+            Speed: x{{ state.speed }}
             <br>
-            Frame: {{state.frame}}/{{timeRange.length - 1}}
+            Frame: {{ state.frame }}/{{ timeRange.length - 1 }}
         </div>
 
         <div class="control-slider">
