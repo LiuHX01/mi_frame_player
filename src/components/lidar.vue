@@ -40,7 +40,12 @@ export default defineComponent({
             fragmentShader: `
                 varying vec3 vColor;
                 void main() {
-                gl_FragColor = vec4(1.0 - vColor.z / 7.0, 1.0 - sqrt(pow(vColor.x, 2.0) + pow(abs(vColor.y), 3.0)) / 60.0, 1.0, 1.0);
+                // gl_FragColor = vec4(1.0 - vColor.z / 7.0, 1.0 - sqrt(pow(vColor.x, 2.0) + pow(abs(vColor.y), 3.0)) / 60.0, 1.0, 1.0);
+                gl_FragColor = vec4(1.0 - vColor.z / 7.0,
+                                    1.0 - sqrt(pow(vColor.x, 2.0) + pow(abs(vColor.y), 3.0)) / 60.0,
+                                    1.0,
+                                    1.0
+                                    );
                 }
             `
         })

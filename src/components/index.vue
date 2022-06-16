@@ -30,7 +30,8 @@ export default defineComponent({
             frame: 0,
             speed: 1,
             isPlaying: false,
-            percent: 0.0,
+            maxSpeedPlaying: false,
+            needStop: false,
         })
 
 
@@ -81,12 +82,22 @@ export default defineComponent({
                         f = 1
                     }
                 }
+                console.log(state.needStop)
                 if (f === 0) {
-                    state.timer = setTimeout(() => {
-                        run()
-                    }, playPerFrame)
+                    if (state.maxSpeedPlaying) {
+                        if (!state.needStop) {
+                            window.requestAnimationFrame(run)
+                        } else {
+                            state.needStop = false
+                        }
+                    } else {
+                        state.timer = setTimeout(() => {
+                            run()
+                        }, playPerFrame)
+                    }
                 } else {
                     stop()
+                    state.needStop = false
                 }
 
                 return ''
@@ -96,6 +107,7 @@ export default defineComponent({
 
 
         const stop = () => {
+            state.needStop = true
             state.isPlaying = false
 
             // console.log('stop')
@@ -110,6 +122,7 @@ export default defineComponent({
             if (state.isPlaying) {
                 stop()
             } else {
+                state.needStop = false
                 start()
             }
         }
@@ -126,6 +139,7 @@ export default defineComponent({
 
         const prevOneFrame = () => {
             stop()
+            state.needStop = false
             if (!frameChangeLock.playLock) {
                 if (state.frame > 0) {
                     state.frame -= 1
@@ -140,6 +154,7 @@ export default defineComponent({
 
         const nextOneFrame = () => {
             stop()
+            state.needStop = false
             if (!frameChangeLock.playLock) {
                 if (state.frame < props.timeRange.length - 1) {
                     if (frameLoadedRange.value >= state.frame + 1) {
@@ -198,6 +213,7 @@ export default defineComponent({
 
         const jumpFrame = (frame) => {
             stop()
+            state.needStop = false
             if (!frameChangeLock.playLock) {
                 state.frame = frame
             }
@@ -238,6 +254,11 @@ export default defineComponent({
         })
 
 
+        const maxSpeedSwitch = (() => {
+            state.maxSpeedPlaying = !state.maxSpeedPlaying
+        })
+
+
         watch(() => state.frame, () => {
             console.log('[frame]: change to', state.frame)
             frameChangeLock.imageLock = true
@@ -273,11 +294,14 @@ export default defineComponent({
         })
 
 
+
+
         hotkeys('space', clickToStartStop)
         hotkeys('left', prevOneFrame)
         hotkeys('right', nextOneFrame)
         hotkeys('up', upSpeed)
         hotkeys('down', downSpeed)
+        hotkeys('q', maxSpeedSwitch)
 
         return {
             state,
@@ -299,6 +323,10 @@ export default defineComponent({
 
             clickToStartStop,
             frameChangeLock,
+            maxSpeedSwitch,
+
+            frameLoadedRange,
+
         }
     },
 })
@@ -364,6 +392,13 @@ export default defineComponent({
                             </path>
                         </svg>
                     </el-button>
+                    <el-button @click="maxSpeedSwitch">
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" data-v-78e17ca8="">
+                            <path fill="currentColor"
+                                d="M118.656 438.656a32 32 0 0 1 0-45.248L416 96l4.48-3.776A32 32 0 0 1 461.248 96l3.712 4.48a32.064 32.064 0 0 1-3.712 40.832L218.56 384H928a32 32 0 1 1 0 64H141.248a32 32 0 0 1-22.592-9.344zM64 608a32 32 0 0 1 32-32h786.752a32 32 0 0 1 22.656 54.592L608 928l-4.48 3.776a32.064 32.064 0 0 1-40.832-49.024L805.632 640H96a32 32 0 0 1-32-32z">
+                            </path>
+                        </svg>
+                    </el-button>
                 </el-button-group>
             </div>
         </div>
@@ -372,6 +407,10 @@ export default defineComponent({
             Speed: x{{ state.speed }}
             <br>
             Frame: {{ state.frame }}/{{ timeRange.length - 1 }}
+            <br>
+            MaxSpeed: {{ state.maxSpeedPlaying }}
+            <br>
+            Loaded: {{ (Number(frameLoadedRange) / Number(timeRange.length - 1) * 100).toFixed(1) }}%
         </div>
 
         <div class="control-slider">
@@ -390,7 +429,7 @@ export default defineComponent({
 
 <style>
 .control-frame {
-    height: 58px;
+    height: 62px;
     display: flex;
     margin-top: 10px;
     background-color: #f5f5f5;
@@ -400,7 +439,7 @@ export default defineComponent({
 .control-slider {
     flex-grow: 1;
     height: 20px;
-    margin-top: 18px;
+    margin-top: 21px;
     margin-right: 20px;
     background-color: #e0e0e0;
     position: relative;
@@ -409,7 +448,7 @@ export default defineComponent({
 
 .control-panel {
     flex-grow: 0;
-    width: 310px;
+    width: 360px;
 }
 
 .speed-control {
@@ -420,18 +459,18 @@ export default defineComponent({
 }
 
 .play-control {
-    padding-top: 13px;
+    padding-top: 15px;
     display: inline-block;
 }
 
 .info {
-    width: 90px;
-    font-size: 8px;
+    width: 100px;
+    font-size: 12px;
     margin-left: 15px;
     margin-right: 20px;
-    padding-top: 5px;
-    line-height: 23px;
-    display: inline-block;
+    padding-top: 3px;
+    line-height: 14px;
+    /* display: inline-block; */
 }
 
 .ss {
