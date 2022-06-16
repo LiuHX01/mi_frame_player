@@ -385,7 +385,7 @@ export default defineComponent({
         <div class="control-slider">
             <div ref="sliderRef" class="my-slider-control" @click="clickFrame">
                 <div class="loaded-frame"
-                    :style="{ 'display': 'inline-block', width: calcLoadedFrame, 'background-color': '#D1C4E9', height: '20px', 'border-radius': '10px' }">
+                    :style="{ 'display': 'inline-block', width: calcLoadedFrame, 'background-color': '#B39DDB', height: '20px', 'border-radius': '10px' }">
                 </div>
             </div>
         </div>

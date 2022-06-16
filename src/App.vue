@@ -213,7 +213,6 @@ export default defineComponent({
   height: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
   align-items: center;
   margin-top: 20px;
 }

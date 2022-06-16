@@ -1,5 +1,5 @@
 <script>
-import { defineComponent, nextTick, onMounted, ref, reactive } from "vue";
+import { defineComponent, nextTick, onMounted, ref, reactive, watch } from "vue";
 import { frameAdaptorImage, frameAdaptorReadyImage } from './adaptor.js'
 
 export default defineComponent({
@@ -11,7 +11,10 @@ export default defineComponent({
         // const worker = new Worker('/worker.js')
 
 
+
+
         onMounted(() => {
+
             const canvas = document.getElementById('canvas')
             const ctx = canvas.getContext('2d')
 

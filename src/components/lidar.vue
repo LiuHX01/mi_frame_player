@@ -61,7 +61,6 @@ export default defineComponent({
                 position[i - n + 1] = dataArray[i + 1]
                 position[i - n + 2] = dataArray[i + 2] + 2.0
             }
-
             return {
                 position,
             }
@@ -85,7 +84,6 @@ export default defineComponent({
             const axesHelper = new THREE.AxesHelper(5);
             scene.add(axesHelper);
             scene.add(pointCloud);
-
             camera.position.z = 60;
 
             function animate() {
