@@ -71,8 +71,8 @@ export default defineComponent({
                 if (!frameChangeLock.playLock) {
                     if (state.frame < props.timeRange.length - 1) {
                         if (frameLoadedRange.value < state.frame + 1) {
-                            f = 1
-                            stop()
+                            // f = 1
+                            // stop()
                         } else {
                             state.frame += 1
                         }

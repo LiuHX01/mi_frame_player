@@ -120,7 +120,7 @@ export default defineComponent({
                     'position',
                     new THREE.Float32BufferAttribute(position, 3)
                 )
-                frameAdaptorReadyLidar.FramePlayerEmitter(2)
+                frameAdaptorReadyLidar.FramePlayerEmitter()
             })
         })
 

@@ -28,7 +28,7 @@ export default defineComponent({
                     ctx.clearRect(0, 0, canvas.width, canvas.height)
                     // console.log(typeof data[1])
                     ctx.drawImage(data[1], 0, 0, canvas.width, canvas.height)
-                    frameAdaptorReadyImage.FramePlayerEmitter(1)
+                    frameAdaptorReadyImage.FramePlayerEmitter()
                 }
             })
         })
