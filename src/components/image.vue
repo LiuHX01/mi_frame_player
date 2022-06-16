@@ -1,6 +1,7 @@
 <script>
-import { defineComponent, nextTick, onMounted, ref, reactive, watch } from "vue";
+import { defineComponent, onMounted, ref, reactive } from "vue";
 import { frameAdaptorImage, frameAdaptorReadyImage } from './adaptor.js'
+
 
 export default defineComponent({
     name: 'FrameImage',
@@ -8,28 +9,20 @@ export default defineComponent({
         const image = reactive(new Image())
         const containerImage = ref(null)
 
-        // const worker = new Worker('/worker.js')
-
-
-
 
         onMounted(() => {
-
             const canvas = document.getElementById('canvas')
             const ctx = canvas.getContext('2d')
 
+            // 收到 app 传来的 图片数据
             frameAdaptorImage.FramePlayerListener((data) => {
                 image.src = URL.createObjectURL(data[0])
-                // const bitmapImage = data[1]
-                // worker.postMessage(data)
-                // worker.addEventListener('message', (e) => {
-                //     bm = e.data  
-                // })                
+      
+                // 画上bitmap 并通知 control
                 image.onload = () => {
                     canvas.width = containerImage.value.clientWidth
                     canvas.height = containerImage.value.clientHeight
                     ctx.clearRect(0, 0, canvas.width, canvas.height)
-                    // console.log(typeof data[1])
                     ctx.drawImage(data[1], 0, 0, canvas.width, canvas.height)
                     frameAdaptorReadyImage.FramePlayerEmitter()
                 }
@@ -37,7 +30,6 @@ export default defineComponent({
         })
 
         return {
-            image,
             containerImage,
         }
 
@@ -48,7 +40,6 @@ export default defineComponent({
 <template>
     <div ref="containerImage" class="container-image">
         <canvas id="canvas"></canvas>
-        <!-- <img :src="image" alt=""> -->
     </div>
 </template>
 

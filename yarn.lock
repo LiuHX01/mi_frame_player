@@ -188,11 +188,6 @@
     "follow-redirects" "^1.14.9"
     "form-data" "^4.0.0"
 
-"batch-processor@1.0.0":
-  "integrity" "sha512-xoLQD8gmmR32MeuBHgH0Tzd5PuSZx71ZsbhVxOCRbgktZEPe4SQy7s9Z50uPp0F/f7iw2XmkHN2xkgbMfckMDA=="
-  "resolved" "https://registry.npmjs.org/batch-processor/-/batch-processor-1.0.0.tgz"
-  "version" "1.0.0"
-
 "combined-stream@^1.0.8":
   "integrity" "sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg=="
   "resolved" "https://registry.npmjs.org/combined-stream/-/combined-stream-1.0.8.tgz"
@@ -235,13 +230,6 @@
     "lodash-unified" "^1.0.2"
     "memoize-one" "^6.0.0"
     "normalize-wheel-es" "^1.1.2"
-
-"element-resize-detector@^1.2.4":
-  "integrity" "sha512-Fl5Ftk6WwXE0wqCgNoseKWndjzZlDCwuPTcoVZfCP9R3EHQF8qUtr3YUPNETegRBOKqQKPW3n4kiIWngGi8tKg=="
-  "resolved" "https://registry.npmjs.org/element-resize-detector/-/element-resize-detector-1.2.4.tgz"
-  "version" "1.2.4"
-  dependencies:
-    "batch-processor" "1.0.0"
 
 "esbuild-windows-64@0.14.43":
   "integrity" "sha512-8NsuNfI8xwFuJbrCuI+aBqNTYkrWErejFO5aYM+yHqyHuL8mmepLS9EPzAzk8rvfaJrhN0+RvKWAcymViHOKEw=="
@@ -303,13 +291,6 @@
   "resolved" "https://registry.npmjs.org/function-bind/-/function-bind-1.1.1.tgz"
   "version" "1.1.1"
 
-"gasp@^0.0.2":
-  "integrity" "sha512-cJGS8HkASZXLtYnS7CHDUCutYdeV2OXW/P+SU03+allNY26GiYOfstziPjnsMW8bbdf6hoQ3caVHYNZ0YLuFCA=="
-  "resolved" "https://registry.npmjs.org/gasp/-/gasp-0.0.2.tgz"
-  "version" "0.0.2"
-  dependencies:
-    "q" "^1.0.0"
-
 "gsap@^3.10.4":
   "integrity" "sha512-6QatdkKxXCMfvCW4rM++0RqyLQAzFX5nwl3yHS0XPgkZBkiSEY3VZVbMltrdtsbER/xZonLtyHt684wRp4erlQ=="
   "resolved" "https://registry.npmjs.org/gsap/-/gsap-3.10.4.tgz"
@@ -333,11 +314,6 @@
   "version" "2.9.0"
   dependencies:
     "has" "^1.0.3"
-
-"keymaster@^1.6.2":
-  "integrity" "sha512-OvA/AALN8IDKKkTk2Z+bDrzs/SQao4lo/QPbwSdDvm+frxfiYiYCSn1aHFUypJY3SruAO1y/c771agBmTXqUtg=="
-  "resolved" "https://registry.npmjs.org/keymaster/-/keymaster-1.6.2.tgz"
-  "version" "1.6.2"
 
 "lodash-es@*", "lodash-es@^4.17.21":
   "integrity" "sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw=="
@@ -421,11 +397,6 @@
     "nanoid" "^3.3.4"
     "picocolors" "^1.0.0"
     "source-map-js" "^1.0.2"
-
-"q@^1.0.0":
-  "integrity" "sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw=="
-  "resolved" "https://registry.npmjs.org/q/-/q-1.5.1.tgz"
-  "version" "1.5.1"
 
 "resolve@^1.22.0":
   "integrity" "sha512-Hhtrw0nLeSrFQ7phPp4OOcVjLPIeMnRlr5mcnVuMe7M/7eBn98A3hmFRLoFo3DLZkivSYwhRUJTyPyWAk56WLw=="

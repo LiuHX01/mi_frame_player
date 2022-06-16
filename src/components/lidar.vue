@@ -8,7 +8,6 @@ import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls
 import gsap from 'gsap';
 
 
-
 export default defineComponent({
     name: 'FrameLidar',
     setup() {
@@ -16,13 +15,14 @@ export default defineComponent({
         const containerLidar = ref(null)
 
 
-
+        // 物体：点集
         const pointCloudGeometry = new THREE.BufferGeometry()
         pointCloudGeometry.setAttribute(
             'position',
             new THREE.BufferAttribute(new Float32Array([0, 0, 0]), 3)
         )
 
+        // 材质：大小 渐变颜色
         const pointCloudMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 time: { value: 1.0 },
@@ -40,9 +40,8 @@ export default defineComponent({
             fragmentShader: `
                 varying vec3 vColor;
                 void main() {
-                // gl_FragColor = vec4(1.0 - vColor.z / 7.0, 1.0 - sqrt(pow(vColor.x, 2.0) + pow(abs(vColor.y), 3.0)) / 60.0, 1.0, 1.0);
                 gl_FragColor = vec4(1.0 - vColor.z / 7.0,
-                                    1.0 - sqrt(pow(abs(vColor.x), 2.0) + pow(abs(vColor.y), 3.0)) / 60.0,
+                                    1.0 - sqrt(pow(abs(vColor.x), 2.0) + pow(abs(vColor.y), 3.0)) / 70.0,
                                     1.0,
                                     1.0
                                     );
@@ -53,6 +52,8 @@ export default defineComponent({
         const pointCloud = new THREE.Points(pointCloudGeometry, pointCloudMaterial)
         pointCloud.geometry.attributes.position.needsUpdate = true
 
+
+        // 解析数据
         async function parsePointCloud(data) {
             const dataArray = new Float32Array(data)
             const position = new Float32Array(dataArray.length / 4 * 3)
@@ -70,16 +71,21 @@ export default defineComponent({
 
 
         onMounted(() => {
+            // 性能监视器
             const stats = new Stats();
             stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
             document.body.appendChild(stats.dom);
 
+
+            // THREE.js 三要素
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer();
             renderer.setSize(containerLidar.value.clientWidth, containerLidar.value.clientHeight);
             containerLidar.value.appendChild(renderer.domElement);
 
+
+            // 鼠标控制和坐标轴
             const controls = new TrackballControls(camera, renderer.domElement);
             const axesHelper = new THREE.AxesHelper(5);
             scene.add(axesHelper);
@@ -93,6 +99,7 @@ export default defineComponent({
                 renderer.render(scene, camera);
             }
             animate();
+
 
             // GUI
             const EView = {
@@ -116,6 +123,7 @@ export default defineComponent({
             })
 
 
+            // 收到 app 传来的 数据
             frameAdaptorLidar.FramePlayerListener(async (data) => {
                 lidar.value = data
                 const { position } = await parsePointCloud(lidar.value)
@@ -129,7 +137,6 @@ export default defineComponent({
 
         return {
             containerLidar,
-            lidar,
         }
     }
 })

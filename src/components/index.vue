@@ -1,13 +1,11 @@
 <script>
-import { defineComponent, computed, watch, ref, reactive, toRefs, onMounted } from 'vue';
+import { defineComponent, computed, watch, ref, reactive, onMounted } from 'vue';
 import { frameAdaptorFRange, frameAdaptorReadyImage, frameAdaptorReadyLidar } from './adaptor.js';
 import hotkeys from 'hotkeys-js'
 
 
-
 export default defineComponent({
     name: 'framePlayerControl',
-
 
 
     props: {
@@ -15,16 +13,10 @@ export default defineComponent({
             type: Array,
             default: () => [],
         },
-
-        disabled: {
-            type: Boolean,
-            default: () => false,
-        },
     },
 
 
     emits: ['frame-change'],
-
 
 
     setup(props, { emit }) {
@@ -34,12 +26,12 @@ export default defineComponent({
             speed: 1,
             isPlaying: false,
             maxSpeedPlaying: false,
-            needStop: false,
+            needStop: false, // 处理 requestAnimationFrame 的停止
         })
 
 
+        // 已加载帧数 作为播放和跳转的限制 进度条 锁
         let frameLoadedRange = ref(0)
-        const sliderControl = ref(null)
         const sliderRef = ref(null)
         const frameChangeLock = reactive({
             imageLock: true,
@@ -48,12 +40,13 @@ export default defineComponent({
         })
 
 
+        // 开始播放
         const start = () => {
             state.isPlaying = true
             state.needStop = false
 
+            // 0：没到最后 1：到最后
             let f = 0
-
 
             const run = () => {
                 let playPerFrame = 1000
@@ -69,11 +62,12 @@ export default defineComponent({
                     clearTimeout(state.timer)
                 }
 
+                // 上一帧是否渲染完成
                 if (!frameChangeLock.playLock) {
+                    // 当前要播的帧是否已加载过
                     if (state.frame < props.timeRange.length - 1) {
                         if (frameLoadedRange.value < state.frame + 1) {
-                            // f = 1
-                            // stop()
+                            // 等下一次递归 并再次判断
                         } else {
                             state.frame += 1
                         }
@@ -82,13 +76,17 @@ export default defineComponent({
                         f = 1
                     }
                 }
+
+                // 没播到最后 需要下一次递归
                 if (f === 0) {
-                    if (state.maxSpeedPlaying || frameChangeLock.playLock) {
+                    // 最高速状态
+                    if (state.maxSpeedPlaying) {
                         if (!state.needStop) {
                             window.requestAnimationFrame(run)
                         } else {
                             stop()
                         }
+                        // 1 2 4 倍速状态
                     } else {
                         state.timer = setTimeout(() => {
                             run()
@@ -104,6 +102,7 @@ export default defineComponent({
         }
 
 
+        // 停止播放 分别处理 最高速 和 1 2 4 倍速
         const stop = () => {
             state.needStop = true
             state.isPlaying = false
@@ -114,6 +113,7 @@ export default defineComponent({
         }
 
 
+        // 绑定按键
         const clickToStartStop = () => {
             if (state.isPlaying) {
                 stop()
@@ -123,6 +123,7 @@ export default defineComponent({
         }
 
 
+        // 绑定按键 向前/退一帧 有限制
         const prevOneFrame = () => {
             stop()
 
@@ -138,6 +139,7 @@ export default defineComponent({
         }
 
 
+        // 绑定按键 向后/进一帧 有限制
         const nextOneFrame = () => {
             stop()
 
@@ -153,11 +155,7 @@ export default defineComponent({
         }
 
 
-        const speedChange = (speed) => {
-            state.speed = speed
-        }
-
-
+        // 绑定按键 加速
         const upSpeed = () => {
             switch (state.speed) {
                 case 1:
@@ -175,6 +173,7 @@ export default defineComponent({
         }
 
 
+        // 绑定按键 减速
         const downSpeed = () => {
             switch (state.speed) {
                 case 1:
@@ -192,20 +191,15 @@ export default defineComponent({
         }
 
 
-        const jumpFrame = (frame) => {
+        // 点击进度条跳帧 有限制
+        const clickFrame = ($event) => {
             stop()
 
-            if (!frameChangeLock.playLock) {
-                state.frame = frame
-            }
-        }
-
-
-        const clickFrame = ($event) => {
+            // 通过偏移量算出目标帧数
             const { offsetX } = $event
-
             let target = Math.ceil((offsetX / sliderRef.value.clientWidth) * (props.timeRange.length))
 
+            // 避免点不到
             if (target <= 1) {
                 target = 0
             } else if (target >= props.timeRange.length - 2) {
@@ -217,10 +211,13 @@ export default defineComponent({
                 target = frameLoadedRange.value
             }
 
-            jumpFrame(target)
+            if (!frameChangeLock.playLock) {
+                state.frame = target
+            }
         }
 
 
+        // 计算已播放进度条的长度 放入style
         const calcLoadedFrame = computed(() => {
             let x = ((state.frame * 100) / (props.timeRange.length - 1)).toFixed(2)
             const r = `${x}%`
@@ -228,11 +225,13 @@ export default defineComponent({
         })
 
 
+        // 绑定按键 切换 requestAnimationFrame 播放
         const maxSpeedSwitch = (() => {
             state.maxSpeedPlaying = !state.maxSpeedPlaying
         })
 
 
+        // 帧改变时 都锁上 触发事件 并等待这一帧全部渲染完成
         watch(() => state.frame, () => {
             frameChangeLock.imageLock = true
             frameChangeLock.lidarLock = true
@@ -241,6 +240,7 @@ export default defineComponent({
         })
 
 
+        // 监视图片和点云渲染完成情况 都完成可解锁
         watch(() => [frameChangeLock.imageLock, frameChangeLock.lidarLock], () => {
             if (!frameChangeLock.imageLock && !frameChangeLock.lidarLock) {
                 frameChangeLock.playLock = false
@@ -250,6 +250,7 @@ export default defineComponent({
         })
 
 
+        // 监听预加载 图片 点云渲染 情况
         onMounted(() => {
             frameAdaptorFRange.FramePlayerListener((data) => {
                 frameLoadedRange.value = data
@@ -265,8 +266,7 @@ export default defineComponent({
         })
 
 
-
-
+        // 绑定快捷键
         hotkeys('e', clickToStartStop)
         hotkeys('a', prevOneFrame)
         hotkeys('d', nextOneFrame)
@@ -274,28 +274,28 @@ export default defineComponent({
         hotkeys('s', downSpeed)
         hotkeys('q', maxSpeedSwitch)
 
+
+
         return {
             state,
+
             start,
             stop,
-            speedChange,
-            jumpFrame,
-            clickFrame,
-            sliderControl,
+            clickToStartStop,
+
             prevOneFrame,
             nextOneFrame,
-
-            calcLoadedFrame,
-            sliderRef,
             upSpeed,
             downSpeed,
 
-            clickToStartStop,
+            clickFrame,
+            calcLoadedFrame,
+            sliderRef,
+
             frameChangeLock,
             maxSpeedSwitch,
 
             frameLoadedRange,
-
         }
     },
 })
@@ -304,20 +304,6 @@ export default defineComponent({
 <template>
     <div class="control-frame">
         <div class="control-panel">
-            <div class="speed-control">
-                <!-- <el-dropdown trigger="hover">
-                    <el-button type="primary">{{ state.speed }} x</el-button>
-                    <template #dropdown>
-                        <el-dropdown-menu slot="dropdown">
-                            <el-dropdown-item @click="speedChange(1)">1x</el-dropdown-item>
-                            <el-dropdown-item @click="speedChange(2)">2x</el-dropdown-item>
-                            <el-dropdown-item @click="speedChange(4)">4x</el-dropdown-item>
-                        </el-dropdown-menu>
-                    </template>
-                </el-dropdown> -->
-            </div>
-
-
             <div class="play-control">
                 <el-button-group>
                     <el-button @click="downSpeed">
@@ -416,12 +402,6 @@ export default defineComponent({
     width: 360px;
 }
 
-/* .speed-control {
-    margin-left: 20px;
-    padding-top: 10px;
-    padding-bottom: 12.7px;
-    display: inline-block;
-} */
 
 .play-control {
     margin-left: 20px;
