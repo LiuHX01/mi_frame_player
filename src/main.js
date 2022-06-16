@@ -5,12 +5,15 @@ import 'element-plus/dist/index.css'
 
 /**
  * TODO:待解决的问题
- * 1. 自适应窗口大小
- * 2. 太多emitter
+ * 1. 
+ * 2. 
  * 3. 快捷键异常
  * 4. 点云渲染完成时机
- * 5. 有必要给点云worker吗
- * 6. 预加载时播放 下一个25ms / 暂停
+ * 5. 
+ * 6. 
+ * 7.
+ * 8.
+ * 
  */
 
 createApp(App)

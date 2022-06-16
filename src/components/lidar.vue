@@ -31,10 +31,10 @@ export default defineComponent({
             vertexShader: `
                 varying vec3 vColor;
                 void main() {
-                vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-                gl_Position = projectionMatrix * mvPosition;
-                vColor = position;
-                gl_PointSize = 1.0;
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    gl_Position = projectionMatrix * mvPosition;
+                    vColor = position;
+                    gl_PointSize = 1.0;
                 }
             `,
             fragmentShader: `
@@ -42,7 +42,7 @@ export default defineComponent({
                 void main() {
                 // gl_FragColor = vec4(1.0 - vColor.z / 7.0, 1.0 - sqrt(pow(vColor.x, 2.0) + pow(abs(vColor.y), 3.0)) / 60.0, 1.0, 1.0);
                 gl_FragColor = vec4(1.0 - vColor.z / 7.0,
-                                    1.0 - sqrt(pow(vColor.x, 2.0) + pow(abs(vColor.y), 3.0)) / 60.0,
+                                    1.0 - sqrt(pow(abs(vColor.x), 2.0) + pow(abs(vColor.y), 3.0)) / 60.0,
                                     1.0,
                                     1.0
                                     );

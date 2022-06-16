@@ -32,12 +32,12 @@ export default defineComponent({
     let frameLoaded = ref(1)
 
 
-    const imageMap = new Map()
-    const lidarMap = new Map()
-    const bitmapMap = new Map()
-    let imLen = ref(0)
-    let lmLen = ref(0)
-    let bmLen = ref(0)
+    const imageMap = reactive(new Map())
+    const lidarMap = reactive(new Map())
+    const bitmapMap = reactive(new Map())
+    // let imLen = ref(0)
+    // let lmLen = ref(0)
+    // let bmLen = ref(0)
 
 
     const worker = new Worker('/worker.js')
@@ -74,24 +74,45 @@ export default defineComponent({
 
       fetchSingleData(timeRange[frame])
     }
-    
 
 
-    watch(() => [imLen.value, bmLen.value, lmLen.value], () => {
-      if (imLen.value > bmLen.value) {
-        if (bmLen.value > lmLen.value) {
-          frameLoaded.value = lmLen.value
+
+    // watch(() => [imLen.value, bmLen.value, lmLen.value], () => {
+    //   if (imLen.value > bmLen.value) {
+    //     if (bmLen.value > lmLen.value) {
+    //       frameLoaded.value = lmLen.value
+    //     } else {
+    //       frameLoaded.value = bmLen.value
+    //     }
+    //   } else { // im <
+    //     if (imLen.value > lmLen.value) {
+    //       frameLoaded.value = lmLen.value
+    //     } else {
+    //       frameLoaded.value = imLen.value
+    //     }
+    //   }
+
+    //   frameLoaded.value--
+
+    //   frameAdaptorFRange.FramePlayerEmitter(frameLoaded.value)
+    // })
+
+
+    watch(() => [imageMap.size, lidarMap.size, bitmapMap.size], () => {
+      if (imageMap.size > bitmapMap.size) {
+        if (bitmapMap.size > lidarMap.size) {
+          frameLoaded.value = lidarMap.size
         } else {
-          frameLoaded.value = bmLen.value
+          frameLoaded.value = bitmapMap.size
         }
       } else { // im <
-        if (imLen.value > lmLen.value) {
-          frameLoaded.value = lmLen.value
+        if (imageMap.size > lidarMap.size) {
+          frameLoaded.value = lidarMap.size
         } else {
-          frameLoaded.value = imLen.value
+          frameLoaded.value = imageMap.size
         }
       }
-
+      
       frameLoaded.value--
 
       frameAdaptorFRange.FramePlayerEmitter(frameLoaded.value)
@@ -113,18 +134,18 @@ export default defineComponent({
         })
 
         imageMap.set(timestamp, imageResponse.data)
-        imLen.value = imageMap.size
+        // imLen.value = imageMap.size
         lidarMap.set(timestamp, lidarResponse.data)
-        lmLen.value = lidarMap.size
+        // lmLen.value = lidarMap.size
 
 
-        
+
 
 
         if (timestamp === timeRange[0]) {
           const frameZeroBitmap = await createImageBitmap(imageResponse.data)
           bitmapMap.set(timestamp, frameZeroBitmap)
-          bmLen.value = bitmapMap.size
+          // bmLen.value = bitmapMap.size
           fetchSingleData(timeRange[0])
         }
 
@@ -159,7 +180,7 @@ export default defineComponent({
 
       worker.addEventListener('message', (e) => {
         bitmapMap.set(e.data[0], e.data[1])
-        bmLen.value = bitmapMap.size
+        // bmLen.value = bitmapMap.size
       })
 
       preLoadData()
@@ -176,9 +197,9 @@ export default defineComponent({
       imageMap,
       lidarMap,
       bitmapMap,
-      imLen,
-      lmLen,
-      bmLen,
+      // imLen,
+      // lmLen,
+      // bmLen,
       worker,
 
     }
@@ -195,8 +216,7 @@ export default defineComponent({
       <frame-image></frame-image>
     </div>
     <div>
-      <frame-player-control class="player-control" :timeRange="timeRange"
-        @frame-change="frameChangeHandler">
+      <frame-player-control class="player-control" :timeRange="timeRange" @frame-change="frameChangeHandler">
       </frame-player-control>
     </div>
   </div>

@@ -107,7 +107,7 @@ export default defineComponent({
         const stop = () => {
             state.needStop = true
             state.isPlaying = false
-  
+
             if (state.timer) {
                 clearTimeout(state.timer)
             }
@@ -140,7 +140,7 @@ export default defineComponent({
 
         const nextOneFrame = () => {
             stop()
- 
+
             if (!frameChangeLock.playLock) {
                 if (state.frame < props.timeRange.length - 1) {
                     if (frameLoadedRange.value >= state.frame + 1) {
@@ -267,11 +267,11 @@ export default defineComponent({
 
 
 
-        hotkeys('space', clickToStartStop)
-        hotkeys('left', prevOneFrame)
-        hotkeys('right', nextOneFrame)
-        hotkeys('up', upSpeed)
-        hotkeys('down', downSpeed)
+        hotkeys('e', clickToStartStop)
+        hotkeys('a', prevOneFrame)
+        hotkeys('d', nextOneFrame)
+        hotkeys('w', upSpeed)
+        hotkeys('s', downSpeed)
         hotkeys('q', maxSpeedSwitch)
 
         return {
@@ -416,14 +416,15 @@ export default defineComponent({
     width: 360px;
 }
 
-.speed-control {
+/* .speed-control {
     margin-left: 20px;
     padding-top: 10px;
     padding-bottom: 12.7px;
     display: inline-block;
-}
+} */
 
 .play-control {
+    margin-left: 20px;
     padding-top: 15px;
     display: inline-block;
 }
