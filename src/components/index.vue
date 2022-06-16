@@ -3,10 +3,13 @@ import { defineComponent, computed, watch, ref, reactive, toRefs, onMounted } fr
 import { frameAdaptorFRange, frameAdaptorReadyImage, frameAdaptorReadyLidar } from './adaptor.js';
 import hotkeys from 'hotkeys-js'
 
+
+
 export default defineComponent({
     name: 'framePlayerControl',
 
-    // 父组件传递过来的数据
+
+
     props: {
         timeRange: {
             type: Array,
@@ -20,8 +23,8 @@ export default defineComponent({
     },
 
 
-
     emits: ['frame-change'],
+
 
 
     setup(props, { emit }) {
@@ -36,8 +39,6 @@ export default defineComponent({
 
 
         let frameLoadedRange = ref(0)
-
-
         const sliderControl = ref(null)
         const sliderRef = ref(null)
         const frameChangeLock = reactive({
@@ -49,13 +50,12 @@ export default defineComponent({
 
         const start = () => {
             state.isPlaying = true
+            state.needStop = false
 
             let f = 0
 
-            // console.log('start')
 
             const run = () => {
-                // console.log(props.frameLoadedRange)
                 let playPerFrame = 1000
                 if (state.speed === 1) {
                     playPerFrame = 1000 / 10
@@ -82,13 +82,12 @@ export default defineComponent({
                         f = 1
                     }
                 }
-                console.log(state.needStop)
                 if (f === 0) {
-                    if (state.maxSpeedPlaying) {
+                    if (state.maxSpeedPlaying || frameChangeLock.playLock) {
                         if (!state.needStop) {
                             window.requestAnimationFrame(run)
                         } else {
-                            state.needStop = false
+                            stop()
                         }
                     } else {
                         state.timer = setTimeout(() => {
@@ -97,7 +96,6 @@ export default defineComponent({
                     }
                 } else {
                     stop()
-                    state.needStop = false
                 }
 
                 return ''
@@ -109,9 +107,7 @@ export default defineComponent({
         const stop = () => {
             state.needStop = true
             state.isPlaying = false
-
-            // console.log('stop')
-
+  
             if (state.timer) {
                 clearTimeout(state.timer)
             }
@@ -122,24 +118,14 @@ export default defineComponent({
             if (state.isPlaying) {
                 stop()
             } else {
-                state.needStop = false
                 start()
             }
         }
 
 
-        const reset = () => {
-            stop()
-
-            // console.log('reset')
-
-            state.frame = 0
-        }
-
-
         const prevOneFrame = () => {
             stop()
-            state.needStop = false
+
             if (!frameChangeLock.playLock) {
                 if (state.frame > 0) {
                     state.frame -= 1
@@ -154,7 +140,7 @@ export default defineComponent({
 
         const nextOneFrame = () => {
             stop()
-            state.needStop = false
+ 
             if (!frameChangeLock.playLock) {
                 if (state.frame < props.timeRange.length - 1) {
                     if (frameLoadedRange.value >= state.frame + 1) {
@@ -206,14 +192,9 @@ export default defineComponent({
         }
 
 
-        const calcPercent = () => {
-            state.percent = (state.frame / (props.timeRange.length - 1)) * 100
-        }
-
-
         const jumpFrame = (frame) => {
             stop()
-            state.needStop = false
+
             if (!frameChangeLock.playLock) {
                 state.frame = frame
             }
@@ -224,7 +205,6 @@ export default defineComponent({
             const { offsetX } = $event
 
             let target = Math.ceil((offsetX / sliderRef.value.clientWidth) * (props.timeRange.length))
-            // console.log('offsetX:', offsetX, 'target:', target)
 
             if (target <= 1) {
                 target = 0
@@ -248,23 +228,15 @@ export default defineComponent({
         })
 
 
-        const calcNowFrame = computed(() => {
-            let r = Number(((state.frame * 100) / (props.timeRange.length - 1)).toFixed(2))
-            return r
-        })
-
-
         const maxSpeedSwitch = (() => {
             state.maxSpeedPlaying = !state.maxSpeedPlaying
         })
 
 
         watch(() => state.frame, () => {
-            console.log('[frame]: change to', state.frame)
             frameChangeLock.imageLock = true
             frameChangeLock.lidarLock = true
             frameChangeLock.playLock = true
-            console.log('[lock]: playLock lock')
             emit('frame-change', state.frame)
         })
 
@@ -272,7 +244,6 @@ export default defineComponent({
         watch(() => [frameChangeLock.imageLock, frameChangeLock.lidarLock], () => {
             if (!frameChangeLock.imageLock && !frameChangeLock.lidarLock) {
                 frameChangeLock.playLock = false
-                console.log('[lock]: playLock unlock')
             } else {
                 frameChangeLock.playLock = true
             }
@@ -308,7 +279,6 @@ export default defineComponent({
             start,
             stop,
             speedChange,
-            reset,
             jumpFrame,
             clickFrame,
             sliderControl,
@@ -316,7 +286,6 @@ export default defineComponent({
             nextOneFrame,
 
             calcLoadedFrame,
-            calcNowFrame,
             sliderRef,
             upSpeed,
             downSpeed,
@@ -416,12 +385,8 @@ export default defineComponent({
         <div class="control-slider">
             <div ref="sliderRef" class="my-slider-control" @click="clickFrame">
                 <div class="loaded-frame"
-                    :style="{ 'display': 'inline-block', width: calcLoadedFrame, 'background-color': '#B39DDB', height: '20px', 'border-radius': '10px' }">
+                    :style="{ 'display': 'inline-block', width: calcLoadedFrame, 'background-color': '#D1C4E9', height: '20px', 'border-radius': '10px' }">
                 </div>
-                <!-- TODO:进度条末端 -->
-                <!-- <div class="now-frame"
-                    :style="{ position: 'absolute', 'display': 'inline-block', 'left': calcNowFrame + '%', height: '20px', width: '5px', 'background-color': '#fff'}">
-                </div> -->
             </div>
         </div>
     </div>
@@ -470,7 +435,7 @@ export default defineComponent({
     margin-right: 20px;
     padding-top: 3px;
     line-height: 14px;
-    /* display: inline-block; */
+    display: inline;
 }
 
 .ss {

@@ -44,7 +44,7 @@ export default defineComponent({
 
 
     const fetchSingleData = (timestamp) => {
-      console.log('[data]: fetching data', timestamp)
+      // console.log('[data]: fetching data', timestamp)
       // const fetchSingleData = async (timestamp) => {
       // const imageResponse = await Axios.get(`/data/image_00/data/${timestamp}.png`, {
       //   responseType: 'blob',
@@ -122,18 +122,14 @@ export default defineComponent({
 
 
         if (timestamp === timeRange[0]) {
-          console.log('[load]: pre load 0%')
           const frameZeroBitmap = await createImageBitmap(imageResponse.data)
           bitmapMap.set(timestamp, frameZeroBitmap)
           bmLen.value = bitmapMap.size
           fetchSingleData(timeRange[0])
         }
 
-        if (i === timeRange.length / 2) {
-          console.log('[load]: pre load 50%')
-        }
+
       }
-      console.log('[load]: pre load 100%')
     }
 
 
