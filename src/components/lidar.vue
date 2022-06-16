@@ -1,6 +1,6 @@
 <script>
 import { defineComponent, onMounted, ref } from "vue";
-import { frameAdaptorLidar } from './adaptor.js'
+import { frameAdaptorLidar, frameAdaptorReadyLidar } from './adaptor.js'
 import * as THREE from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
@@ -120,6 +120,7 @@ export default defineComponent({
                     'position',
                     new THREE.Float32BufferAttribute(position, 3)
                 )
+                frameAdaptorReadyLidar.FramePlayerEmitter(2)
             })
         })
 

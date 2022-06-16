@@ -2,11 +2,9 @@
 import { defineComponent, ref, reactive, toRefs, onMounted, watch } from "vue";
 import framePlayerControl from './components/index.vue';
 import Axios from 'axios';
-import { frameAdaptorImage, frameAdaptorLidar, frameAdaptorReady, frameAdaptorFRange } from './components/adaptor.js';
+import { frameAdaptorImage, frameAdaptorLidar, frameAdaptorFRange } from './components/adaptor.js';
 import FrameImage from './components/image.vue';
 import FrameLidar from './components/lidar.vue';
-import { computed } from "@vue/reactivity";
-import { min } from "lodash";
 
 
 export default defineComponent({
@@ -46,6 +44,7 @@ export default defineComponent({
 
 
     const fetchSingleData = (timestamp) => {
+      console.log('[data]: fetching data', timestamp)
       // const fetchSingleData = async (timestamp) => {
       // const imageResponse = await Axios.get(`/data/image_00/data/${timestamp}.png`, {
       //   responseType: 'blob',
@@ -95,7 +94,6 @@ export default defineComponent({
 
       frameLoaded.value--
 
-      console.log(imLen.value, lmLen.value, bmLen.value, frameLoaded.value)
       frameAdaptorFRange.FramePlayerEmitter(frameLoaded.value)
     })
 
@@ -124,20 +122,24 @@ export default defineComponent({
 
 
         if (timestamp === timeRange[0]) {
+          console.log('[load]: pre load 0%')
           const frameZeroBitmap = await createImageBitmap(imageResponse.data)
           bitmapMap.set(timestamp, frameZeroBitmap)
           bmLen.value = bitmapMap.size
           fetchSingleData(timeRange[0])
         }
+
+        if (i === timeRange.length / 2) {
+          console.log('[load]: pre load 50%')
+        }
       }
-      console.log('Done', imageMap, lidarMap, bitmapMap, imLen.value, lmLen.value, bmLen.value)
+      console.log('[load]: pre load 100%')
     }
 
 
 
     // 挂载时，初始化数据
     onMounted(() => {
-      console.log('APP onMounted');
 
       // console.log(requestAnimationFrame())
 

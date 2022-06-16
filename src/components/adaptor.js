@@ -26,13 +26,15 @@ class FrameAdaptor {
 
 const frameAdaptorImage = new FrameAdaptor('imageTransfer')
 const frameAdaptorLidar = new FrameAdaptor('lidarTransfer')
-const frameAdaptorReady = new FrameAdaptor('readyTransfer')
+const frameAdaptorReadyImage = new FrameAdaptor('readyImageTransfer')
+const frameAdaptorReadyLidar = new FrameAdaptor('readyLidarTransfer')
 const frameAdaptorFRange = new FrameAdaptor('fRangeTransfer')
 
 
 export {
     frameAdaptorImage,
     frameAdaptorLidar,
-    frameAdaptorReady,
+    frameAdaptorReadyImage,
+    frameAdaptorReadyLidar,
     frameAdaptorFRange,
 }

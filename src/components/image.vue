@@ -1,6 +1,6 @@
 <script>
 import { defineComponent, nextTick, onMounted, ref, reactive } from "vue";
-import { frameAdaptorImage } from './adaptor.js'
+import { frameAdaptorImage, frameAdaptorReadyImage } from './adaptor.js'
 
 export default defineComponent({
     name: 'FrameImage',
@@ -28,6 +28,7 @@ export default defineComponent({
                     ctx.clearRect(0, 0, canvas.width, canvas.height)
                     // console.log(typeof data[1])
                     ctx.drawImage(data[1], 0, 0, canvas.width, canvas.height)
+                    frameAdaptorReadyImage.FramePlayerEmitter(1)
                 }
             })
         })

@@ -6,10 +6,10 @@ import 'element-plus/dist/index.css'
 /**
  * TODO:
  * 1. 自适应窗口大小
- * 2. Canvas 图片性能
- * 3. 太多emitter
- * 4. 快捷键异常
- * 5. 挂bitmap
+ * 2. 太多emitter
+ * 3. 快捷键异常
+ * 4.
+ * 5.
  */
 
 createApp(App)

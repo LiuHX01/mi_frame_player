@@ -1,6 +1,6 @@
 <script>
 import { defineComponent, computed, watch, ref, reactive, toRefs, onMounted } from 'vue';
-import { frameAdaptorFRange } from './adaptor.js';
+import { frameAdaptorFRange, frameAdaptorReadyImage, frameAdaptorReadyLidar } from './adaptor.js';
 import hotkeys from 'hotkeys-js'
 
 export default defineComponent({
@@ -11,11 +11,6 @@ export default defineComponent({
         timeRange: {
             type: Array,
             default: () => [],
-        },
-
-        locked: {
-            type: Boolean,
-            default: () => false,
         },
 
         disabled: {
@@ -44,8 +39,12 @@ export default defineComponent({
 
         const sliderControl = ref(null)
         const sliderRef = ref(null)
+        const frameChangeLock = reactive({
+            imageLock: true,
+            lidarLock: true,
+            playLock: true,
+        })
 
-        const { disabled } = toRefs(props)
 
         const start = () => {
             state.isPlaying = true
@@ -69,18 +68,19 @@ export default defineComponent({
                     clearTimeout(state.timer)
                 }
 
-                if (state.frame < props.timeRange.length - 1) {
-                    if (frameLoadedRange.value < state.frame + 1) {
-                        f = 1
-                        stop()
+                if (!frameChangeLock.playLock) {
+                    if (state.frame < props.timeRange.length - 1) {
+                        if (frameLoadedRange.value < state.frame + 1) {
+                            f = 1
+                            stop()
+                        } else {
+                            state.frame += 1
+                        }
                     } else {
-                        state.frame += 1
+                        state.frame = 0
+                        f = 1
                     }
-                } else {
-                    state.frame = 0
-                    f = 1
                 }
-
                 if (f === 0) {
                     state.timer = setTimeout(() => {
                         run()
@@ -126,12 +126,13 @@ export default defineComponent({
 
         const prevOneFrame = () => {
             stop()
-
-            if (state.frame > 0) {
-                state.frame -= 1
-            } else {
-                if (props.timeRange.length - 1 === frameLoadedRange.value) {
-                    state.frame = props.timeRange.length - 1
+            if (!frameChangeLock.playLock) {
+                if (state.frame > 0) {
+                    state.frame -= 1
+                } else {
+                    if (props.timeRange.length - 1 === frameLoadedRange.value) {
+                        state.frame = props.timeRange.length - 1
+                    }
                 }
             }
         }
@@ -139,13 +140,14 @@ export default defineComponent({
 
         const nextOneFrame = () => {
             stop()
-
-            if (state.frame < props.timeRange.length - 1) {
-                if (frameLoadedRange.value >= state.frame + 1) {
-                    state.frame += 1
+            if (!frameChangeLock.playLock) {
+                if (state.frame < props.timeRange.length - 1) {
+                    if (frameLoadedRange.value >= state.frame + 1) {
+                        state.frame += 1
+                    }
+                } else {
+                    state.frame = 0
                 }
-            } else {
-                state.frame = 0
             }
         }
 
@@ -196,7 +198,9 @@ export default defineComponent({
 
         const jumpFrame = (frame) => {
             stop()
-            state.frame = frame
+            if (!frameChangeLock.playLock) {
+                state.frame = frame
+            }
         }
 
 
@@ -217,7 +221,6 @@ export default defineComponent({
                 target = frameLoadedRange.value
             }
 
-
             jumpFrame(target)
         }
 
@@ -236,14 +239,36 @@ export default defineComponent({
 
 
         watch(() => state.frame, () => {
-            // calcPercent(),
+            console.log('[frame]: change to', state.frame)
+            frameChangeLock.imageLock = true
+            frameChangeLock.lidarLock = true
+            frameChangeLock.playLock = true
+            console.log('[lock]: playLock lock')
             emit('frame-change', state.frame)
+        })
+
+
+        watch(() => [frameChangeLock.imageLock, frameChangeLock.lidarLock], () => {
+            if (!frameChangeLock.imageLock && !frameChangeLock.lidarLock) {
+                frameChangeLock.playLock = false
+                console.log('[lock]: playLock unlock')
+            } else {
+                frameChangeLock.playLock = true
+            }
         })
 
 
         onMounted(() => {
             frameAdaptorFRange.FramePlayerListener((data) => {
                 frameLoadedRange.value = data
+            })
+
+            frameAdaptorReadyImage.FramePlayerListener((data) => {
+                frameChangeLock.imageLock = false
+            })
+
+            frameAdaptorReadyLidar.FramePlayerListener((data) => {
+                frameChangeLock.lidarLock = false
             })
         })
 
@@ -273,6 +298,7 @@ export default defineComponent({
             downSpeed,
 
             clickToStartStop,
+            frameChangeLock,
         }
     },
 })
