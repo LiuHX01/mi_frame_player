@@ -268,10 +268,10 @@ export default defineComponent({
 
         // 绑定快捷键
         hotkeys('e', clickToStartStop)
-        hotkeys('a', prevOneFrame)
-        hotkeys('d', nextOneFrame)
-        hotkeys('w', upSpeed)
-        hotkeys('s', downSpeed)
+        hotkeys('left', prevOneFrame)
+        hotkeys('right', nextOneFrame)
+        hotkeys('up', upSpeed)
+        hotkeys('down', downSpeed)
         hotkeys('q', maxSpeedSwitch)
 
 
