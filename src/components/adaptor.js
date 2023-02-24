@@ -1,10 +1,6 @@
 import mitt from 'mitt'
 
-
-
 const emitter = mitt()
-
-
 
 class FrameAdaptor {
     constructor(namespace) {
